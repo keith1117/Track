@@ -1,0 +1,170 @@
+{
+  "mode": "Built-in ImageGen",
+  "selected": [
+    {
+      "id": "lat-pulldown",
+      "file": "lat-pulldown.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-9c764f98-e209-4346-ba67-029d73e9ae1a.png"
+    },
+    {
+      "id": "cardio-runner",
+      "file": "cardio-runner.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-9b6f9a40-1c8b-40de-ac2f-ad466dd5af33.png"
+    },
+    {
+      "id": "seated-row",
+      "file": "seated-row.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-6a2d7587-5cd9-4055-b8fa-3402cdb6e124.png"
+    },
+    {
+      "id": "barbell-row",
+      "file": "barbell-row.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-2eb4f6db-4c08-456b-aa3f-2feff508d98e.png"
+    },
+    {
+      "id": "overhead-press",
+      "file": "overhead-press.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-d4d4a24f-6d05-4b42-895f-ae7de5a8b480.png"
+    },
+    {
+      "id": "pull-up",
+      "file": "pull-up.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-330156ed-8a2b-42db-9e6c-34e11fe7ba71.png"
+    },
+    {
+      "id": "straight-arm",
+      "file": "straight-arm.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-81863492-d026-4996-a936-546031818bfd.png"
+    },
+    {
+      "id": "dumbbell-press",
+      "file": "dumbbell-press.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-9921a35d-90dd-40d4-b2a5-e840edaa7a0e.png"
+    },
+    {
+      "id": "lateral-raise",
+      "file": "lateral-raise.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-d7102d83-c3c5-4490-9e8c-ff802a142d03.png"
+    },
+    {
+      "id": "face-pull",
+      "file": "face-pull.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-57f92b8c-e5fe-4bb5-baa6-915044e7c041.png"
+    },
+    {
+      "id": "reverse-fly",
+      "file": "reverse-fly.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-d896d105-82d0-4be6-b3e8-cb3b77642995.png"
+    },
+    {
+      "id": "barbell-squat",
+      "file": "barbell-squat.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-094ded16-b078-4801-966a-7d95f6aa291f.png"
+    },
+    {
+      "id": "romanian-deadlift",
+      "file": "romanian-deadlift.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-c7c97c84-60a2-40dc-9795-7dadabf8bbfe.png"
+    },
+    {
+      "id": "leg-press",
+      "file": "leg-press.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-a01442ac-44ac-4ce9-bbf0-c1e500713fac.png"
+    },
+    {
+      "id": "leg-extension",
+      "file": "leg-extension.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-7688ad8f-004d-4b99-91dc-14cae43c158f.png"
+    },
+    {
+      "id": "calf-raise",
+      "file": "calf-raise.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-8a433f99-856f-4ac5-bbe2-e404262df56a.png"
+    },
+    {
+      "id": "barbell-curl",
+      "file": "barbell-curl.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-494ce67e-a474-4351-8e43-2df7dfd092fe.png"
+    },
+    {
+      "id": "leg-curl",
+      "file": "leg-curl.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-90ae2435-b093-4246-ae33-aa67f2077428.png"
+    },
+    {
+      "id": "hammer-curl",
+      "file": "hammer-curl.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-17bfe759-3d64-42a8-a90d-9685648f443c.png"
+    },
+    {
+      "id": "overhead-extension",
+      "file": "overhead-extension.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-d5800c31-f772-4ad1-a759-3240b2732475.png"
+    },
+    {
+      "id": "triceps-pushdown",
+      "file": "triceps-pushdown.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-818b59d5-b37e-4122-a560-5753a1ac916a.png"
+    },
+    {
+      "id": "preacher-curl",
+      "file": "preacher-curl.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-8aad8f05-c9cf-4a9b-892b-b24a9a64a712.png"
+    },
+    {
+      "id": "ab-crunch-machine",
+      "file": "ab-crunch-machine.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-654b2316-c60e-4a7e-a57b-f64a898e47ba.png"
+    },
+    {
+      "id": "cable-crunch",
+      "file": "cable-crunch.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-1b94f92f-e4b2-405a-abf7-defc77ef07e6.png"
+    },
+    {
+      "id": "pallof-press",
+      "file": "pallof-press.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-2c76426a-89a5-48b6-bfb5-7b0620fbbf92.png"
+    },
+    {
+      "id": "weighted-twist",
+      "file": "weighted-twist.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-f79ca3c1-1cc1-4991-9cd5-ea49335b8594.png"
+    },
+    {
+      "id": "kettlebell-side-bend",
+      "file": "kettlebell-side-bend.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-8b366bd7-8b75-4571-8556-8412dc8cd59e.png"
+    },
+    {
+      "id": "rowing-machine",
+      "file": "rowing-machine.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-5dfba011-5132-4482-8972-cf159da3980b.png"
+    },
+    {
+      "id": "elliptical",
+      "file": "elliptical.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-936fb732-cfa5-414f-b280-d21ef517328f.png"
+    },
+    {
+      "id": "treadmill-run",
+      "file": "treadmill-run.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-5238028c-5883-4e79-8baa-d095d131fc16.png"
+    },
+    {
+      "id": "indoor-cycle",
+      "file": "indoor-cycle.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-4fefee7a-a4eb-4b1c-9e58-54ac14c17e8e.png"
+    },
+    {
+      "id": "incline-walk",
+      "file": "incline-walk.png",
+      "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-de90b3e0-fd45-4cf4-a438-def11b81905c.png"
+    }
+  ],
+  "approvedChest": {
+    "file": "chest-preview.png",
+    "source": "C:\\Users\\happy\\.codex\\generated_images\\01a0eb93-ac22-7072-8358-b2c43f166773\\exec-5eb55834-6256-4148-bde3-30fe564b6dd6.png",
+    "exercises": 8
+  }
+}

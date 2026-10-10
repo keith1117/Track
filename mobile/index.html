@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#071013" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#071013" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content="Track，把每一次训练变成看得见的成长" />
+    <title>Track | Turn Progress Into a Stronger You</title>
+    <link rel="stylesheet" href="styles.css?v=11" />
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+
+    <main class="app-shell" aria-label="Track fitness app">
+      <div class="phone-frame">
+        <div class="dynamic-island" aria-hidden="true"></div>
+        <header class="status-bar" aria-hidden="true">
+          <span id="clock">9:41</span>
+          <div class="status-icons" aria-label="网络和电池状态">
+            <span>▮▮▮</span><span>⌁</span><span class="battery"></span>
+          </div>
+        </header>
+
+        <section id="app-content" class="app-content" aria-label="当前页面"></section>
+
+        <nav class="bottom-nav" aria-label="主导航">
+          <button class="nav-item active" data-page="home" aria-label="首页">
+            <span class="nav-icon" data-icon="home"></span><span>首页</span>
+          </button>
+          <button class="nav-item" data-page="level" aria-label="等级">
+            <span class="nav-icon" data-icon="chart"></span><span>等级</span>
+          </button>
+          <button class="nav-item" data-page="social" aria-label="社区">
+            <span class="nav-icon" data-icon="users"></span><span>社区</span>
+          </button>
+          <button class="nav-item" data-page="profile" aria-label="我的">
+            <span class="nav-icon" data-icon="user"></span><span>我的</span>
+          </button>
+        </nav>
+        <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+      </div>
+    </main>
+
+    <script src="core.js?v=6"></script>
+    <script src="app.js?v=11"></script>
+  </body>
+</html>
