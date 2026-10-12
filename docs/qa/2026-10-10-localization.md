@@ -53,7 +53,7 @@ Viewport override was reset. Previously resized test tabs retained their per-tab
 - Direct file opening was attempted, but the browser tool security policy permits only HTTP/HTTPS and blocked file://. No workaround was attempted. Local script ordering, generated messages and assets are checked without JSON fetching, but a real browser file-open result is not claimed.
 - Real-phone keyboard, touch, safe-area and browser chrome behavior are not verified by desktop emulation and remain hardware checks.
 - Existing exercise illustrations still require the separately requested future professional movement review. No movement anatomy was regenerated in this localization task; edited body copies are not a medical certification.
-- Remote CI and synchronization are checked after the reviewed implementation is submitted; their final evidence is recorded below when available.
+- Remote verification applies to the implementation commit named below; the subsequent completion-record commit changes only this QA document and the plan.
 
 ## Final independent review
 
@@ -73,3 +73,9 @@ Final local checks: 69/69 tests pass, including the HTTP preview test with local
 8. The main executor checks remote SHA and CI after review, rather than treating the reviewer as proof of delivery. Residual cost: review alone cannot establish remote completion; final synchronization requires separate evidence.
 
 Deferred Minor findings: none.
+
+## GitHub verification
+
+Implementation commit 4b21bff5182e9ba67c7c76e121f2437cb801e476 was pushed to origin/dev after fetching and confirming no divergence. The remote dev SHA matched the local commit. [Mobile checks run 38209446320](https://github.com/keith1117/Track/actions/runs/38209446320) completed successfully for this exact SHA and push event: message-catalog generation check and all mobile tests both succeeded. The following completion-record commit only updates this QA document and the implementation-plan checkboxes/status; mobile source, tests, assets, AGENTS and workflow remain identical to the remotely tested commit. Documentation-only paths do not trigger the workflow.
+
+Remote main remains bc850eb04ed660b33fae95cdd43656e3262a19fb. No PR, merge, release/tag, deployment or repository-settings change was performed. Root README.md remains the sole unrelated local modification and was not committed. Final dev SHA is verified again after the documentation synchronization and reported in the completion response.
