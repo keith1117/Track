@@ -143,6 +143,8 @@ function readSavedHistory() {
     const saved = JSON.parse(localStorage.getItem(historyStorageKey) || '[]');
     if (!Array.isArray(saved)) return [];
     return saved.filter((entry) => entry && exercises[entry.bodyPart]?.some((item) => item.id === entry.exerciseId)
+      && typeof entry.date === 'string'
+      && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(entry.date)
       && Number.isFinite(new Date(entry.date).getTime()) && Array.isArray(entry.sets)
       && entry.sets.every((set) => Number.isFinite(set?.weight) && Number.isFinite(set?.reps)));
   } catch { return []; }

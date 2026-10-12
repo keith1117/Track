@@ -174,6 +174,23 @@ test('corrupt or blocked storage is not deleted during initialization or switchi
     assert.ok(ui.storageWrites.every(write=>write.key!=='track.training-history.v1'));
   }
 });
+test('structurally corrupt history dates cannot crash history or rewrite stored records', () => {
+  const valid={id:'prior',bodyPart:'chest',exerciseId:'bench-press',date:'2026-03-08T12:00:00Z',sets:[{weight:65,reps:8}]};
+  const history=[valid,...[1,null,undefined,[], '1', '2026-03-08'].map((date,index)=>({...valid,id:`bad-${index}`,date}))];
+  for(const locale of ['en','zh-CN']) {
+    const ui=loadUI({history,locale,allowLocalePreview:true});
+    assert.doesNotThrow(()=>{
+      ui.dispatchClick({bodyLevel:'chest'});
+      ui.dispatchClick({muscleTab:'history'});
+      ui.dispatchClick({historyPeriod:'all'});
+    });
+    assert.equal(ui.run('JSON.stringify(state.history)'),JSON.stringify([valid]));
+    assert.equal(ui.context.localStorage.getItem('track.training-history.v1'),JSON.stringify(history));
+    ui.dispatchClick({locale:locale==='en'?'zh-CN':'en'});
+    assert.ok(ui.storageWrites.every(write=>write.key!=='track.training-history.v1'));
+    assert.equal(ui.context.localStorage.getItem('track.training-history.v1'),JSON.stringify(history));
+  }
+});
 test('existing saved history keeps its numeric schema after localized logging', () => {
   const entry={id:'prior',bodyPart:'chest',exerciseId:'bench-press',date:'2026-03-08T12:00:00Z',sets:[{weight:65,reps:8}]};
   const ui=loadUI({history:[entry],locale:'zh-CN',allowLocalePreview:true});

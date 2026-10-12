@@ -53,4 +53,23 @@ Viewport override was reset. Previously resized test tabs retained their per-tab
 - Direct file opening was attempted, but the browser tool security policy permits only HTTP/HTTPS and blocked file://. No workaround was attempted. Local script ordering, generated messages and assets are checked without JSON fetching, but a real browser file-open result is not claimed.
 - Real-phone keyboard, touch, safe-area and browser chrome behavior are not verified by desktop emulation and remain hardware checks.
 - Existing exercise illustrations still require the separately requested future professional movement review. No movement anatomy was regenerated in this localization task; edited body copies are not a medical certification.
-- Final independent review and GitHub CI results are recorded after task 7.
+- Remote CI and synchronization are checked after the reviewed implementation is submitted; their final evidence is recorded below when available.
+
+## Final independent review
+
+One fresh-context reviewer examined the whole implementation before synchronization. No Critical or Minor issues were reported. The one Important finding was structurally corrupt historical dates: numeric/null dates could pass initial validation and crash the all-history chart. The new regression clicked through the real UI handlers and failed with the slice exception before the fix. History loading now accepts only valid ISO timestamp strings; invalid entries are skipped in memory without rewriting stored records. The regression passes in both languages, preserves a valid old entry and the original stored JSON, and verifies that language switching does not write training history.
+
+Final local checks: 69/69 tests pass, including the HTTP preview test with localhost access; locale generation check and whitespace check pass. The reviewer independently passed 67 of the then-existing 68 tests; its HTTP test was blocked by sandbox EACCES, not an application assertion. The main executor's full run includes that test and the new regression. The one test-first fix pass is complete, with no second review dispatch.
+
+## Execution rulings and residual costs
+
+1. Use the approved existing dev checkout, not a new worktree, because the design targets this preview and branch. Residual cost: intermediate implementation appeared in the current preview before final verification.
+2. Browser language preference matches public languages only, even in preview; Chinese preview requires an explicit URL or saved choice. This follows design section 5. Residual cost: a Chinese browser alone does not automatically choose internal Chinese.
+3. Date-only chart buckets use UTC calendar labels; full timestamps retain local display. Existing UTC aggregation and stored dates are unchanged. Residual cost: local-day aggregation, if desired, needs a separate analytics change.
+4. Review occurs before final task completion and push, as task 7 explicitly requires. Residual cost: bookkeeping order differs from the generic execution diagram, not product behavior.
+5. Direct file execution remains unverified because browser policy blocked it. Residual cost: a file-specific issue may remain until a permitted browser checks it.
+6. Physical-phone interaction remains unverified; desktop evidence does not establish keyboard, touch, safe areas or browser chrome. Residual cost: a hardware-specific input/layout issue may remain.
+7. Professional movement correctness remains deferred by the approved scope. Residual cost: existing illustration inaccuracies remain until the separate professional review.
+8. The main executor checks remote SHA and CI after review, rather than treating the reviewer as proof of delivery. Residual cost: review alone cannot establish remote completion; final synchronization requires separate evidence.
+
+Deferred Minor findings: none.
