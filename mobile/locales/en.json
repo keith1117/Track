@@ -376,7 +376,7 @@
     "one": "{count} session",
     "other": "{count} sessions"
   },
-  "history.entrySummary": "{date} · {count} sets",
+  "history.entrySummary": {"one":"{date} · {count} set", "other":"{date} · {count} sets"},
   "history.setLabel": "Set {index}",
   "social.postCount": {
     "one": "{count}K post",

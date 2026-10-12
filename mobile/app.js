@@ -213,7 +213,9 @@ function renderLocaleSwitcher() {
 }
 function setAppLocale(locale) {
   if (!i18n.setLocale(locale)) return false;
-  syncLocaleChrome(); render(true); return true;
+  syncLocaleChrome();
+  if (showToast.key) toast.textContent = t(showToast.key);
+  render(true); return true;
 }
 
 const icons = {
@@ -381,7 +383,7 @@ function renderLevel() {
 }
 
 function historyDate(date) {
-  return i18n.formatDate(date, {month:'short', day:'numeric'});
+  return i18n.formatDate(date, {month:'short', day:'numeric', ...(/^\d{4}-\d{2}-\d{2}$/.test(date) ? {timeZone:'UTC'} : {})});
 }
 
 function historyChart(entries, metric) {
@@ -542,8 +544,9 @@ function render(preserveScroll = false) {
   }
 }
 
-function showToast(message) {
-  toast.textContent = message; toast.classList.add('show'); clearTimeout(showToast.timer);
+function showToast(key) {
+  showToast.key = key;
+  toast.textContent = t(key); toast.classList.add('show'); clearTimeout(showToast.timer);
   showToast.timer = setTimeout(() => toast.classList.remove('show'), 1800);
 }
 
@@ -588,7 +591,7 @@ document.addEventListener('click', (event) => {
     setPlan(state, planTarget.dataset.plan);
     if (state.plan === 'free' && state.page === 'coach') navigate(state, 'home');
     render(app.dataset.view === state.page);
-    showToast(t(state.plan === 'pro' ? 'toast.pro' : 'toast.free'));
+    showToast(state.plan === 'pro' ? 'toast.pro' : 'toast.free');
     return;
   }
   const pageTarget = event.target.closest('[data-page]');
@@ -637,21 +640,21 @@ document.addEventListener('click', (event) => {
     if (!selected) return;
     if (state.selectedBodyPart === 'cardio') state.cardioLog = { minutes: selected.minutes, distance: selected.distance };
     else { state.workout.sets[0].weight = metricWeight(selected.current); state.workout.sets[0].reps = 8; }
-    render(true); showToast(t('toast.useLast'));
+    render(true); showToast('toast.useLast');
   }
-  if (action === 'save-exercise') { saveExercise(state); persistHistory(); render(); showToast(t('toast.saved')); }
+  if (action === 'save-exercise') { saveExercise(state); persistHistory(); render(); showToast('toast.saved'); }
   if (action === 'history-reset') { Object.assign(state.historyFilters, { period: '90', exerciseId: 'all', reps: 'all', minWeight: '', maxWeight: '', metric: 'weight' }); render(true); }
   if (action === 'finish-day') { state.dailyStrain = 100; navigate(state, 'complete'); render(); }
   if (action === 'continue-home') { state.dailyStrain = 32; state.completedExercises = []; state.workout.sets = [{ id: 1, weight: 70, reps: 8, completed: false }]; state.cardioLog = null; state.selectedExercise = 'bench-press'; navigate(state, 'home'); render(); }
   if (action === 'open-explore') { navigate(state, 'explore'); render(); }
   if (action === 'open-coach') { navigate(state, state.plan === 'pro' ? 'coach' : 'subscription'); render(); }
   if (action === 'clear-search') { state.recentSearches = []; render(); }
-  if (action === 'notifications') showToast(t('toast.notifications'));
-  if (action === 'comments') showToast(t('toast.comments'));
-  if (action === 'share') showToast(t('toast.share'));
-  if (action === 'set-title') showToast(t('toast.title'));
-  if (action === 'coach-answer') showToast(t('toast.coach'));
-  if (action === 'upgrade') { setPlan(state, 'pro'); navigate(state, 'coach'); render(); showToast(t('toast.upgrade')); }
+  if (action === 'notifications') showToast('toast.notifications');
+  if (action === 'comments') showToast('toast.comments');
+  if (action === 'share') showToast('toast.share');
+  if (action === 'set-title') showToast('toast.title');
+  if (action === 'coach-answer') showToast('toast.coach');
+  if (action === 'upgrade') { setPlan(state, 'pro'); navigate(state, 'coach'); render(); showToast('toast.upgrade'); }
 });
 
 function updateClock() {

@@ -376,7 +376,7 @@
     "one": "{count} 次",
     "other": "{count} 次"
   },
-  "history.entrySummary": "{date} · {count} 组",
+  "history.entrySummary": {"one":"{date} · {count} 组", "other":"{date} · {count} 组"},
   "history.setLabel": "第 {index} 组",
   "social.postCount": {
     "one": "{count}K 动态",

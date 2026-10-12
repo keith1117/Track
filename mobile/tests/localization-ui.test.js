@@ -1,5 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const {spawnSync} = require('node:child_process');
 const {loadUI} = require('./helpers/load-ui.js');
 const pages=['home','exercise','log','complete','coach','level','muscle','titles','title-detail','social','search','explore','public-profile','profile','stats','achievements','settings','subscription'];
 test('six body cards use text-free cropped art and independently localized real controls', () => {
@@ -82,6 +83,27 @@ test('every informational action uses a localized toast', () => {
     }
     assert.equal(ui.run('i18n.getMissingKeys().length'),0);
   }
+});
+test('an existing toast follows a language change without resetting training', () => {
+  const ui=loadUI({allowLocalePreview:true});
+  ui.dispatchClick({action:'notifications'});
+  assert.equal(ui.nodes['#toast'].textContent,'No new training reminders');
+  const before=ui.run('JSON.stringify(state)');
+  ui.dispatchClick({locale:'zh-CN'});
+  assert.equal(ui.nodes['#toast'].textContent,'没有新的训练提醒');
+  assert.equal(ui.run('JSON.stringify(state)'),before);
+});
+test('history entry summaries use singular English for one saved set', () => {
+  const entry={id:'one-set',bodyPart:'chest',exerciseId:'bench-press',date:'2026-03-08T12:00:00Z',sets:[{weight:70,reps:8}]};
+  const ui=loadUI({history:[entry]});
+  ui.run("state.historyFilters.period='all'");
+  const html=ui.run('renderHistory(bodyParts[0],exercises.chest)');
+  assert.match(html,/· 1 set</);assert.doesNotMatch(html,/· 1 sets</);assert.match(html,/· 3 sets</);
+});
+test('date-only chart buckets do not shift to the previous day in western timezones', () => {
+  const helper=require.resolve('./helpers/load-ui.js');
+  const result=spawnSync(process.execPath,['-e',`const {loadUI}=require(${JSON.stringify(helper)});const assert=require('node:assert/strict');assert.equal(loadUI().run("historyDate('2026-03-08')"),'Mar 8');`],{encoding:'utf8',env:{...process.env,TZ:'America/New_York'}});
+  assert.equal(result.status,0,result.stderr);
 });
 test('all 39 illustrated exercise buttons navigate to their stable logging IDs', () => {
   for(const locale of ['en','zh-CN']) {

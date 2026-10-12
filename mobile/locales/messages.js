@@ -168,7 +168,10 @@
     "history.empty": "No sets match these filters. Try a wider rep, weight or date range.",
     "history.emptyTrend": "No trend data for these filters",
     "history.entries": "Workout records",
-    "history.entrySummary": "{date} · {count} sets",
+    "history.entrySummary": {
+      "one": "{date} · {count} set",
+      "other": "{date} · {count} sets"
+    },
     "history.exercise": "Exercise",
     "history.filters": "History filters",
     "history.genericExercise": "Exercise",
@@ -564,7 +567,10 @@
     "history.empty": "没有符合条件的训练组。试试放宽次数、重量或时间范围。",
     "history.emptyTrend": "当前筛选下暂无趋势数据",
     "history.entries": "训练记录",
-    "history.entrySummary": "{date} · {count} 组",
+    "history.entrySummary": {
+      "one": "{date} · {count} 组",
+      "other": "{date} · {count} 组"
+    },
     "history.exercise": "动作",
     "history.filters": "历史筛选",
     "history.genericExercise": "训练动作",
