@@ -1,6 +1,88 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {loadUI} = require('./helpers/load-ui.js');
+const pages=['home','exercise','log','complete','coach','level','muscle','titles','title-detail','social','search','explore','public-profile','profile','stats','achievements','settings','subscription'];
+for(const page of pages) test(`${page} renders complete bilingual copy in Free and Pro`, () => {
+  for(const locale of ['en','zh-CN']) {
+    const ui=loadUI({locale,allowLocalePreview:true});
+    assert.equal(ui.run('Object.keys(views).length'),18);
+    for(const plan of ['free','pro']) {
+      ui.run(`state.plan='${plan}';state.page='${page}'`);
+      const html=ui.run('views[state.page]()');
+      assert.doesNotMatch(html,/undefined|NaN|\[object Object\]/);
+      if(locale==='en')assert.doesNotMatch(html,/[\u3400-\u9fff]/,`${page}/${plan}`);
+    }
+    assert.equal(ui.run('i18n.getMissingKeys().length'),0,ui.run('JSON.stringify(i18n.getMissingKeys())'));
+  }
+});
+test('region pricing is independent of locale and has no invented dollar amount', () => {
+  for(const locale of ['en','zh-CN']) {
+    const ui=loadUI({locale,allowLocalePreview:true});
+    const html=ui.run('renderSubscription()');
+    assert.match(html,locale==='en'?/Pricing coming soon/:/定价尚未确定/);
+    assert.doesNotMatch(html,/¥298|\$298|USD/);
+  }
+  const ui=loadUI({allowLocalePreview:true,regionProfile:'cn-prototype'});
+  const before=ui.run('JSON.stringify(TrackReleaseConfig.regions)');
+  for(const locale of ['en','zh-CN']) {
+    ui.run(`setAppLocale('${locale}')`);
+    assert.match(ui.run('renderSubscription()'),/298/);
+    assert.match(ui.run('renderSubscription()'),locale==='en'?/Prototype price/:/原型示例价格/);
+  }
+  assert.equal(ui.run('JSON.stringify(TrackReleaseConfig.regions)'),before);
+});
+test('user search terms stay untranslated and cannot become HTML or aria markup', () => {
+  const ui=loadUI();
+  ui.run(`state.recentSearches=[${JSON.stringify('<img src=x onerror=1>&"中文')}];`);
+  const html=ui.run('renderSearch()');
+  assert.doesNotMatch(html,/<img src=x|aria-label="[^"]*"中文/);
+  assert.match(html,/&lt;img src=x onerror=1&gt;&amp;&quot;中文/);
+});
+test('localized history and titles cover non-default states without missing messages', () => {
+  for(const locale of ['en','zh-CN']) {
+    const ui=loadUI({locale,allowLocalePreview:true});
+    for(const part of ['chest','back','shoulders','legs','arms','abs']) {
+      ui.dispatchClick({bodyLevel:part});
+      for(const muscleTab of ['current','history','records']) {
+        ui.dispatchClick({muscleTab});
+        const html=ui.app.innerHTML.replace(/简体中文/g,'');
+        if(locale==='en')assert.doesNotMatch(html,/[\u3400-\u9fff]/);
+        assert.doesNotMatch(html,/undefined|NaN|\[object Object\]/);
+      }
+    }
+    for(const id of ui.run('titles.map(item=>item.id)')) {
+      ui.dispatchClick({title:id});assert.doesNotMatch(ui.app.innerHTML,/undefined|NaN/);
+    }
+    ui.run("state.historyFilters.minWeight='999999';state.activeMuscleTab='history'");
+    const empty=ui.run('renderMuscle()');
+    assert.match(empty,/history-empty/);if(locale==='en')assert.doesNotMatch(empty,/[\u3400-\u9fff]/);
+    assert.equal(ui.run('i18n.getMissingKeys().length'),0);
+  }
+});
+test('every informational action uses a localized toast', () => {
+  for(const locale of ['en','zh-CN']) {
+    const ui=loadUI({locale,allowLocalePreview:true});
+    for(const action of ['notifications','comments','share','set-title','coach-answer','upgrade']) {
+      ui.dispatchClick({action});const text=ui.nodes['#toast'].textContent;
+      assert.ok(text.length>0);if(locale==='en')assert.doesNotMatch(text,/[\u3400-\u9fff]/);
+    }
+    assert.equal(ui.run('i18n.getMissingKeys().length'),0);
+  }
+});
+test('all 39 illustrated exercise buttons navigate to their stable logging IDs', () => {
+  for(const locale of ['en','zh-CN']) {
+    const ui=loadUI({locale,allowLocalePreview:true});let count=0;
+    for(const bodyPart of ['chest','back','shoulders','legs','arms','abs','cardio']) {
+      ui.dispatchClick({bodyPart});
+      for(const exercise of ui.run(`exercises['${bodyPart}'].map(item=>item.id)`)) {
+        ui.dispatchClick({exercise});count++;
+        assert.equal(ui.run('state.page'),'log');assert.equal(ui.run('state.selectedExercise'),exercise);
+        assert.match(ui.app.innerHTML,new RegExp(`data-exercise-art="${exercise}"`));
+      }
+    }
+    assert.equal(count,39);assert.equal(ui.run('i18n.getMissingKeys().length'),0);
+  }
+});
 test('language switching preserves the entire unsaved training state', () => {
   const ui = loadUI({allowLocalePreview:true});
   ui.run("state.plan='pro';state.page='log';state.workout.sets[0].weight=75.5;state.workout.sets[0].completed=true;state.cardioLog={minutes:31,distance:5.2};state.historyFilters.minWeight='70'");
