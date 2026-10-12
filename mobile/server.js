@@ -1,15 +1,24 @@
 const http = require('node:http');
 const { readFile } = require('node:fs');
-const { extname, join, normalize } = require('node:path');
+const { extname, resolve, sep } = require('node:path');
+const releaseConfig = require('./release-config.js');
 
 const root = __dirname;
 const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.png': 'image/png' };
 
-http.createServer((request, response) => {
-  const pathname = request.url === '/' ? '/index.html' : request.url.split('?')[0];
-  const filePath = normalize(join(root, pathname));
-  if (!filePath.startsWith(root)) {
+function createPreviewServer({allowLocalePreview = false} = {}) {
+  return http.createServer((request, response) => {
+  const rawPath = request.url.split('?')[0];
+  const pathname = rawPath === '/' ? '/index.html' : rawPath;
+  const filePath = resolve(root, '.' + pathname);
+  if (!filePath.startsWith(root + sep)) {
     response.writeHead(403).end('Forbidden');
+    return;
+  }
+  if (pathname === '/release-config.js' && allowLocalePreview) {
+    const config = {...releaseConfig, allowLocalePreview:true};
+    response.writeHead(200, {'Content-Type':types['.js'], 'Cache-Control':'no-store'});
+    response.end(`(function(root){const config=${JSON.stringify(config)};if(typeof module==='object'&&module.exports)module.exports=config;if(root)root.TrackReleaseConfig=config;})(typeof globalThis!=='undefined'?globalThis:this);`);
     return;
   }
   readFile(filePath, (error, content) => {
@@ -23,4 +32,7 @@ http.createServer((request, response) => {
     });
     response.end(content);
   });
-}).listen(4173, '127.0.0.1');
+  });
+}
+if (require.main === module) createPreviewServer({allowLocalePreview:process.env.TRACK_LOCALE_PREVIEW === '1'}).listen(4173, '127.0.0.1');
+module.exports = {createPreviewServer};
