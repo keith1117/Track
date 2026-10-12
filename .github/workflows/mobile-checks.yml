@@ -1,0 +1,29 @@
+name: Mobile checks
+
+on:
+  push:
+    branches: [dev, main]
+    paths: ['mobile/**', '.github/workflows/mobile-checks.yml', 'AGENTS.md']
+  pull_request:
+    branches: [dev, main]
+    paths: ['mobile/**', '.github/workflows/mobile-checks.yml', 'AGENTS.md']
+
+permissions:
+  contents: read
+
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Check message catalogs and generated output
+        run: node mobile/scripts/build-locales.js --check
+      - name: Run all mobile tests
+        run: node --test

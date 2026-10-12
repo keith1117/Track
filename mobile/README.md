@@ -4,24 +4,55 @@
 
 ## 本地运行
 
-在 `mobile` 目录启动内置的静态预览服务：
+在项目根目录启动内置的静态预览服务，默认仅提供英文：
 
 ```powershell
-node server.js
+$env:TRACK_LOCALE_PREVIEW="0"
+node mobile/server.js
 ```
 
-然后打开 `http://localhost:4173`。
+然后打开 `http://127.0.0.1:4173/`。服务只监听本机，不对外发布。
 
-也可以直接双击 `index.html` 预览。
+也保留直接打开 `mobile/index.html` 的无构建形式：所有脚本和图片为相对路径，不请求 JSON。当前自动化浏览器不允许 file://，因此直接打开的真实浏览器兼容性仍需人工确认。
+
+### 中文内部预览
+
+先停止当前服务，再在项目根目录明确开启预览：
+
+```powershell
+$env:TRACK_LOCALE_PREVIEW="1"; node mobile/server.js
+```
+
+打开 `http://127.0.0.1:4173/?locale=zh-CN`，也可以使用内部语言选择按钮。关闭预览时停止服务，并用上面的英文启动命令重新启动；环境值只有严格为 `1` 才启用预览。这个开关不是身份验证或文案保密措施。
+
+普通模式无中文入口；浏览器语言、旧语言偏好或中文 URL 均不能绕过公开语言白名单。预览期间切换语言保留页面、会员模式、训练输入、完成组、历史筛选与已存记录。语言偏好键为 `track.locale.v1`，训练历史仍为 `track.training-history.v1`，不迁移或清空存储。
+
+### 文案与发布维护
+
+只编辑 `mobile/locales/en.json` 和 `mobile/locales/zh-CN.json`；键名和参数一致，完整句子支持 `{parameter}`，英文计数使用 one/other。不要人工修改生成的 messages.js，也不要在页面里加入双语言 HTML 或逐字替换逻辑。
+
+```powershell
+node mobile/scripts/build-locales.js
+node mobile/scripts/build-locales.js --check
+node --test
+```
+
+以上命令在项目根目录运行，无需 npm install。生成检查不会写文件，过期输出、漏键、空文本和插值参数不一致都会使检查失败。GitHub 在 dev/main 的相关 push 和普通 PR 上运行同一套只读检查，不自动部署或提交。
+
+`mobile/release-config.js` 当前 defaultLocale 为 en、publicLocales 仅 en、预览默认关闭；将来中文验收完成后，在同一配置开放 zh-CN，而不是复制业务代码或长期维护中文分支。
+
+语言与地区独立：global 使用 kg/km、annualPrice 为 null，中英文都显示未定价。只有显式把 regionProfile 配为 cn-prototype 才显示标明原型示例的 CNY 298；切换语言不改价格、单位或历史数据。这里没有真实付款。
+
+日常改动检查后同步 dev。合并 main、正式标签、部署和默认分支变更必须单独确认。
 
 ## 已实现
 
-- 四项主导航：首页、等级、社区、我的
+- 18 页共用一个渲染实现，覆盖英文与中文的 Free/Track Pro；四项主导航默认 Home、Level、Community、Profile
 - 身体部位、动作选择、训练记录、完成奖励的完整路径
 - 七个身体部位各有独立动作目录；有氧动作按时长和距离记录
-- 首页胸部、背部、肩部、腿部直接复用用户指定原图 `assets/body-parts-reference.png`，保留原始轮廓、高亮、卡片文字、比例和间距；未重新绘制或修改图片
-- 手臂与核心使用内置图像生成工具制作的配套素材 `assets/body-parts-arms-core.png`，匹配前四张的银灰轮廓、绿色高亮、圆角、文字与箭头；仅显示素材的底部一行，原始前四张图片保持不变
-- 六张图像卡片上的真实按钮保留训练入口、按压反馈、键盘焦点和读屏名称；有氧使用银灰轮廓跑者配图，不高亮任何肌群。卡片文字为固定视觉素材，不代表完整解剖图谱或专业认证
+- 两张人体原图保持原文件和 SHA256 不变。用户同意的 ImageGen 去字副本为 assets/body-parts-clean-reference.png、assets/body-parts-clean-arms-core.png；来源与完整提示词保存在 assets/body-parts-clean.prompt.md
+- 六张人体卡片统一格式，插画只显示原图编辑副本中的人体区域；标题、状态、推荐标签和箭头由 HTML/CSS 构成并可翻译，不再显示图片中的中文
+- 六个独立训练按钮保留按压反馈、键盘焦点和读屏名称；有氧仍使用现有银灰轮廓跑者，不高亮任何肌群。插画不代表完整解剖图谱或专业认证
 - 39 个动作均使用器械或动作示意配图，动作列表、训练记录页和部位记录页共用素材；胸部 8 个动作通过显示区域裁切直接复用已确认样张，其余 31 个动作使用独立透明背景素材
 - 图片、生成方式和逐动作提示词保存在 `assets/exercises/`；图像细节尚待逐项校正，不作为经专业审核的动作教学资料。动作名称、重量、参与比例和按钮均保留为可交互的页面内容，不烘焙进新配图
 - 每个动作展示主要肌群参与比例，记录页展示完整示意分布（非实测数据）
@@ -53,5 +84,10 @@ node server.js
 ## 测试
 
 ```powershell
-node --test tests\core.test.js tests\ui.test.js
+node mobile/scripts/build-locales.js --check
+node --test
 ```
+
+在项目根目录运行。测试包含词典/生成文件、公开语言限制、本机 HTTP 预览、双语言 18 页、39 动作入口、历史和未保存输入保留、转义、价格独立及原图不变性。
+
+真实浏览器验收与截图记录见 docs/qa/2026-10-10-localization.md：已覆盖 320、390、430 CSS 像素和默认桌面手机框；真机与直接文件打开的限制单独记录，不把桌面模拟当作真机验证。

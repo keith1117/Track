@@ -58,3 +58,13 @@ test('generation is deterministic and detects stale output', () => {
     assert.equal(fs.readFileSync(path.join(fixture, 'locales/messages.js'), 'utf8'), stale);
   } finally { fs.rmSync(fixture, {recursive:true, force:true}); }
 });
+test('release maintenance entry keeps English public and preview explicitly documented', () => {
+  assert.deepEqual(require('../release-config.js').publicLocales,['en']);
+  assert.equal(require('../release-config.js').allowLocalePreview,false);
+  const before=fs.readFileSync(messagesPath,'utf8');
+  const result=spawnSync(process.execPath,[scriptPath,'--check'],{encoding:'utf8'});
+  assert.equal(result.status,0,result.stderr);
+  assert.equal(fs.readFileSync(messagesPath,'utf8'),before);
+  assert.match(fs.readFileSync(path.resolve(__dirname,'../README.md'),'utf8'),/TRACK_LOCALE_PREVIEW/);
+  assert.ok(fs.existsSync(path.resolve(__dirname,'../../.github/workflows/mobile-checks.yml')));
+});
