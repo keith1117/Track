@@ -1,74 +1,95 @@
 const { createInitialState, navigate, addSet, updateSet, toggleSet, saveExercise, setPlan, filterHistory, summarizeHistory } = window.TrackCore;
+let localeStorage = null;
+try { localeStorage = window.localStorage; } catch { /* Browser storage may be blocked. */ }
+const i18n = window.TrackI18n.createI18n({messages:window.TrackMessages, config:window.TrackReleaseConfig,
+  storage:localeStorage, browserLocales:navigator.languages || [], search:location.search});
+const t = (key, params) => i18n.t(key, params);
+const h = (key, params) => i18n.html(key, params);
+const e = window.TrackI18n.escapeHTML;
+const n = (value, options) => i18n.formatNumber(value, options);
+function bodyPartName(id) { return t(`body.${id}.name`); }
+function exerciseName(id) { return t(`exercise.${id}.name`); }
+function formatExerciseMetric(metric) {
+  return metric.kind === 'reps' ? t('metric.reps',{count:metric.value}) : t(`metric.${metric.kind}`,{value:metric.value});
+}
+function metricWeight(metric) { return ['weight','bodyweight'].includes(metric.kind) ? metric.value : 0; }
 
 const state = createInitialState();
 state.selectedTitle = 'momentum-builder';
 state.recentSearches = ['push day', 'marathon', '@alexchen.fit', 'home workout'];
 
 const bodyParts = [
-  { id: 'chest', name: '胸部', icon: 'chest', mark: 'CH', level: 24, score: 78, recommended: true, note: '48 小时前训练' },
-  { id: 'back', name: '背部', icon: 'back', mark: 'BK', level: 27, score: 72, note: '状态良好' },
-  { id: 'shoulders', name: '肩部', icon: 'shoulders', mark: 'SH', level: 23, score: 68, note: '3 天前训练' },
-  { id: 'legs', name: '腿部', icon: 'legs', mark: 'LG', level: 25, score: 62, note: '昨天训练' },
-  { id: 'arms', name: '手臂', icon: 'arms', mark: 'AR', level: 22, score: 55, note: '状态良好' },
-  { id: 'abs', name: '核心', icon: 'abs', mark: 'CO', level: 20, score: 70, note: '4 天前训练' },
-  { id: 'cardio', name: '有氧', icon: 'cardio', mark: 'CD', level: 18, score: 46, note: '本周 1 次' }
+  { id: 'chest', nameKey: 'body.chest.name', icon: 'chest', mark: 'CH', level: 24, score: 78, recommended: true, noteKey: 'body.chest.note' },
+  { id: 'back', nameKey: 'body.back.name', icon: 'back', mark: 'BK', level: 27, score: 72, noteKey: 'body.back.note' },
+  { id: 'shoulders', nameKey: 'body.shoulders.name', icon: 'shoulders', mark: 'SH', level: 23, score: 68, noteKey: 'body.shoulders.note' },
+  { id: 'legs', nameKey: 'body.legs.name', icon: 'legs', mark: 'LG', level: 25, score: 62, noteKey: 'body.legs.note' },
+  { id: 'arms', nameKey: 'body.arms.name', icon: 'arms', mark: 'AR', level: 22, score: 55, noteKey: 'body.arms.note' },
+  { id: 'abs', nameKey: 'body.abs.name', icon: 'abs', mark: 'CO', level: 20, score: 70, noteKey: 'body.abs.note' },
+  { id: 'cardio', nameKey: 'body.cardio.name', icon: 'cardio', mark: 'CD', level: 18, score: 46, noteKey: 'body.cardio.note' }
 ];
 
 const exercises = {
   chest: [
-    { id: 'bench-press', name: '杠铃卧推', mark: 'BP', level: 28, current: '70 kg', pr: '100 kg', recommended: '推荐' },
-    { id: 'incline-dumbbell', name: '上斜哑铃卧推', mark: 'ID', level: 24, current: '32.5 kg', pr: '40 kg', recommended: '适合你' },
-    { id: 'chest-press', name: '器械推胸', mark: 'CP', level: 22, current: '92 kg', pr: '120 kg' },
-    { id: 'cable-fly', name: '绳索夹胸', mark: 'CF', level: 20, current: '28 kg', pr: '35 kg', recommended: '推荐' },
-    { id: 'decline-bench', name: '下斜卧推', mark: 'DB', level: 19, current: '60 kg', pr: '80 kg' },
-    { id: 'push-up', name: '俯卧撑', mark: 'PU', level: 21, current: '20 次', pr: '38 次' },
-    { id: 'dips', name: '双杠臂屈伸', mark: 'DP', level: 18, current: 'BW + 5', pr: 'BW + 20' },
-    { id: 'pec-deck', name: '蝴蝶机夹胸', mark: 'PF', level: 17, current: '55 kg', pr: '72 kg' }
+    { id: 'bench-press', nameKey: 'exercise.bench-press.name', mark: 'BP', level: 28, current: {kind: 'weight', value: 70}, pr: {kind: 'weight', value: 100}, recommendedKey: 'common.recommended' },
+    { id: 'incline-dumbbell', nameKey: 'exercise.incline-dumbbell.name', mark: 'ID', level: 24, current: {kind: 'weight', value: 32.5}, pr: {kind: 'weight', value: 40}, recommendedKey: 'common.forYou' },
+    { id: 'chest-press', nameKey: 'exercise.chest-press.name', mark: 'CP', level: 22, current: {kind: 'weight', value: 92}, pr: {kind: 'weight', value: 120} },
+    { id: 'cable-fly', nameKey: 'exercise.cable-fly.name', mark: 'CF', level: 20, current: {kind: 'weight', value: 28}, pr: {kind: 'weight', value: 35}, recommendedKey: 'common.recommended' },
+    { id: 'decline-bench', nameKey: 'exercise.decline-bench.name', mark: 'DB', level: 19, current: {kind: 'weight', value: 60}, pr: {kind: 'weight', value: 80} },
+    { id: 'push-up', nameKey: 'exercise.push-up.name', mark: 'PU', level: 21, current: {kind: 'reps', value: 20}, pr: {kind: 'reps', value: 38} },
+    { id: 'dips', nameKey: 'exercise.dips.name', mark: 'DP', level: 18, current: {kind: 'bodyweight', value: 5}, pr: {kind: 'bodyweight', value: 20} },
+    { id: 'pec-deck', nameKey: 'exercise.pec-deck.name', mark: 'PF', level: 17, current: {kind: 'weight', value: 55}, pr: {kind: 'weight', value: 72} }
   ],
   back: [
-    { id: 'lat-pulldown', name: '高位下拉', mark: 'LP', level: 28, current: '70 kg', pr: '100 kg', recommended: '推荐' },
-    { id: 'seated-row', name: '坐姿划船', mark: 'SR', level: 26, current: '68 kg', pr: '92 kg' },
-    { id: 'barbell-row', name: '杠铃划船', mark: 'BR', level: 25, current: '72.5 kg', pr: '95 kg' },
-    { id: 'pull-up', name: '引体向上', mark: 'PU', level: 24, current: 'BW + 10', pr: 'BW + 30' },
-    { id: 'straight-arm', name: '直臂下压', mark: 'SA', level: 19, current: '30 kg', pr: '42 kg' }
+    { id: 'lat-pulldown', nameKey: 'exercise.lat-pulldown.name', mark: 'LP', level: 28, current: {kind: 'weight', value: 70}, pr: {kind: 'weight', value: 100}, recommendedKey: 'common.recommended' },
+    { id: 'seated-row', nameKey: 'exercise.seated-row.name', mark: 'SR', level: 26, current: {kind: 'weight', value: 68}, pr: {kind: 'weight', value: 92} },
+    { id: 'barbell-row', nameKey: 'exercise.barbell-row.name', mark: 'BR', level: 25, current: {kind: 'weight', value: 72.5}, pr: {kind: 'weight', value: 95} },
+    { id: 'pull-up', nameKey: 'exercise.pull-up.name', mark: 'PU', level: 24, current: {kind: 'bodyweight', value: 10}, pr: {kind: 'bodyweight', value: 30} },
+    { id: 'straight-arm', nameKey: 'exercise.straight-arm.name', mark: 'SA', level: 19, current: {kind: 'weight', value: 30}, pr: {kind: 'weight', value: 42} }
   ],
   shoulders: [
-    { id: 'overhead-press', name: '杠铃肩推', mark: 'OP', level: 25, current: '40 kg', pr: '55 kg', recommended: '推荐' },
-    { id: 'dumbbell-press', name: '哑铃肩推', mark: 'DP', level: 23, current: '20 kg', pr: '28 kg' },
-    { id: 'lateral-raise', name: '哑铃侧平举', mark: 'LR', level: 22, current: '10 kg', pr: '16 kg', recommended: '适合你' },
-    { id: 'reverse-fly', name: '反向飞鸟', mark: 'RF', level: 20, current: '24 kg', pr: '36 kg' },
-    { id: 'face-pull', name: '绳索面拉', mark: 'FP', level: 19, current: '22 kg', pr: '32 kg' }
+    { id: 'overhead-press', nameKey: 'exercise.overhead-press.name', mark: 'OP', level: 25, current: {kind: 'weight', value: 40}, pr: {kind: 'weight', value: 55}, recommendedKey: 'common.recommended' },
+    { id: 'dumbbell-press', nameKey: 'exercise.dumbbell-press.name', mark: 'DP', level: 23, current: {kind: 'weight', value: 20}, pr: {kind: 'weight', value: 28} },
+    { id: 'lateral-raise', nameKey: 'exercise.lateral-raise.name', mark: 'LR', level: 22, current: {kind: 'weight', value: 10}, pr: {kind: 'weight', value: 16}, recommendedKey: 'common.forYou' },
+    { id: 'reverse-fly', nameKey: 'exercise.reverse-fly.name', mark: 'RF', level: 20, current: {kind: 'weight', value: 24}, pr: {kind: 'weight', value: 36} },
+    { id: 'face-pull', nameKey: 'exercise.face-pull.name', mark: 'FP', level: 19, current: {kind: 'weight', value: 22}, pr: {kind: 'weight', value: 32} }
   ],
   legs: [
-    { id: 'barbell-squat', name: '杠铃深蹲', mark: 'SQ', level: 27, current: '80 kg', pr: '110 kg', recommended: '推荐' },
-    { id: 'romanian-deadlift', name: '罗马尼亚硬拉', mark: 'RD', level: 25, current: '70 kg', pr: '95 kg' },
-    { id: 'leg-press', name: '腿举', mark: 'LP', level: 24, current: '160 kg', pr: '220 kg' },
-    { id: 'leg-extension', name: '腿屈伸', mark: 'LE', level: 21, current: '45 kg', pr: '65 kg' },
-    { id: 'leg-curl', name: '腿弯举', mark: 'LC', level: 20, current: '40 kg', pr: '58 kg' },
-    { id: 'calf-raise', name: '站姿提踵', mark: 'CR', level: 19, current: '60 kg', pr: '85 kg' }
+    { id: 'barbell-squat', nameKey: 'exercise.barbell-squat.name', mark: 'SQ', level: 27, current: {kind: 'weight', value: 80}, pr: {kind: 'weight', value: 110}, recommendedKey: 'common.recommended' },
+    { id: 'romanian-deadlift', nameKey: 'exercise.romanian-deadlift.name', mark: 'RD', level: 25, current: {kind: 'weight', value: 70}, pr: {kind: 'weight', value: 95} },
+    { id: 'leg-press', nameKey: 'exercise.leg-press.name', mark: 'LP', level: 24, current: {kind: 'weight', value: 160}, pr: {kind: 'weight', value: 220} },
+    { id: 'leg-extension', nameKey: 'exercise.leg-extension.name', mark: 'LE', level: 21, current: {kind: 'weight', value: 45}, pr: {kind: 'weight', value: 65} },
+    { id: 'leg-curl', nameKey: 'exercise.leg-curl.name', mark: 'LC', level: 20, current: {kind: 'weight', value: 40}, pr: {kind: 'weight', value: 58} },
+    { id: 'calf-raise', nameKey: 'exercise.calf-raise.name', mark: 'CR', level: 19, current: {kind: 'weight', value: 60}, pr: {kind: 'weight', value: 85} }
   ],
   arms: [
-    { id: 'barbell-curl', name: '杠铃弯举', mark: 'BC', level: 24, current: '30 kg', pr: '42.5 kg', recommended: '推荐' },
-    { id: 'hammer-curl', name: '锤式弯举', mark: 'HC', level: 22, current: '14 kg', pr: '20 kg' },
-    { id: 'triceps-pushdown', name: '绳索下压', mark: 'TP', level: 23, current: '35 kg', pr: '50 kg' },
-    { id: 'overhead-extension', name: '过顶臂屈伸', mark: 'OE', level: 20, current: '22 kg', pr: '32 kg' },
-    { id: 'preacher-curl', name: '牧师凳弯举', mark: 'PC', level: 19, current: '20 kg', pr: '30 kg' }
+    { id: 'barbell-curl', nameKey: 'exercise.barbell-curl.name', mark: 'BC', level: 24, current: {kind: 'weight', value: 30}, pr: {kind: 'weight', value: 42.5}, recommendedKey: 'common.recommended' },
+    { id: 'hammer-curl', nameKey: 'exercise.hammer-curl.name', mark: 'HC', level: 22, current: {kind: 'weight', value: 14}, pr: {kind: 'weight', value: 20} },
+    { id: 'triceps-pushdown', nameKey: 'exercise.triceps-pushdown.name', mark: 'TP', level: 23, current: {kind: 'weight', value: 35}, pr: {kind: 'weight', value: 50} },
+    { id: 'overhead-extension', nameKey: 'exercise.overhead-extension.name', mark: 'OE', level: 20, current: {kind: 'weight', value: 22}, pr: {kind: 'weight', value: 32} },
+    { id: 'preacher-curl', nameKey: 'exercise.preacher-curl.name', mark: 'PC', level: 19, current: {kind: 'weight', value: 20}, pr: {kind: 'weight', value: 30} }
   ],
   abs: [
-    { id: 'cable-crunch', name: '绳索卷腹', mark: 'CC', level: 23, current: '35 kg', pr: '50 kg', recommended: '推荐' },
-    { id: 'ab-crunch-machine', name: '器械卷腹', mark: 'AC', level: 21, current: '45 kg', pr: '65 kg' },
-    { id: 'pallof-press', name: '抗旋转推举', mark: 'PP', level: 20, current: '18 kg', pr: '28 kg' },
-    { id: 'weighted-twist', name: '负重俄罗斯转体', mark: 'WT', level: 19, current: '10 kg', pr: '18 kg' },
-    { id: 'kettlebell-side-bend', name: '壶铃侧屈', mark: 'SB', level: 18, current: '16 kg', pr: '24 kg' }
+    { id: 'cable-crunch', nameKey: 'exercise.cable-crunch.name', mark: 'CC', level: 23, current: {kind: 'weight', value: 35}, pr: {kind: 'weight', value: 50}, recommendedKey: 'common.recommended' },
+    { id: 'ab-crunch-machine', nameKey: 'exercise.ab-crunch-machine.name', mark: 'AC', level: 21, current: {kind: 'weight', value: 45}, pr: {kind: 'weight', value: 65} },
+    { id: 'pallof-press', nameKey: 'exercise.pallof-press.name', mark: 'PP', level: 20, current: {kind: 'weight', value: 18}, pr: {kind: 'weight', value: 28} },
+    { id: 'weighted-twist', nameKey: 'exercise.weighted-twist.name', mark: 'WT', level: 19, current: {kind: 'weight', value: 10}, pr: {kind: 'weight', value: 18} },
+    { id: 'kettlebell-side-bend', nameKey: 'exercise.kettlebell-side-bend.name', mark: 'SB', level: 18, current: {kind: 'weight', value: 16}, pr: {kind: 'weight', value: 24} }
   ],
   cardio: [
-    { id: 'treadmill-run', name: '跑步机跑步', mark: 'RN', level: 22, current: '30 分钟', pr: '45 分钟', minutes: 30, distance: 5, recommended: '推荐' },
-    { id: 'indoor-cycle', name: '动感单车', mark: 'CY', level: 21, current: '25 分钟', pr: '40 分钟', minutes: 25, distance: 10 },
-    { id: 'rowing-machine', name: '划船机', mark: 'RW', level: 20, current: '20 分钟', pr: '35 分钟', minutes: 20, distance: 4 },
-    { id: 'elliptical', name: '椭圆机', mark: 'EL', level: 19, current: '30 分钟', pr: '45 分钟', minutes: 30, distance: 5 },
-    { id: 'incline-walk', name: '坡度快走', mark: 'IW', level: 18, current: '25 分钟', pr: '40 分钟', minutes: 25, distance: 2.5 }
+    { id: 'treadmill-run', nameKey: 'exercise.treadmill-run.name', mark: 'RN', level: 22, current: {kind: 'duration', value: 30}, pr: {kind: 'duration', value: 45}, minutes: 30, distance: 5, recommendedKey: 'common.recommended' },
+    { id: 'indoor-cycle', nameKey: 'exercise.indoor-cycle.name', mark: 'CY', level: 21, current: {kind: 'duration', value: 25}, pr: {kind: 'duration', value: 40}, minutes: 25, distance: 10 },
+    { id: 'rowing-machine', nameKey: 'exercise.rowing-machine.name', mark: 'RW', level: 20, current: {kind: 'duration', value: 20}, pr: {kind: 'duration', value: 35}, minutes: 20, distance: 4 },
+    { id: 'elliptical', nameKey: 'exercise.elliptical.name', mark: 'EL', level: 19, current: {kind: 'duration', value: 30}, pr: {kind: 'duration', value: 45}, minutes: 30, distance: 5 },
+    { id: 'incline-walk', nameKey: 'exercise.incline-walk.name', mark: 'IW', level: 18, current: {kind: 'duration', value: 25}, pr: {kind: 'duration', value: 40}, minutes: 25, distance: 2.5 }
   ]
 };
+
+for (const part of bodyParts) Object.defineProperties(part, {
+  name:{get:()=>t(part.nameKey)}, note:{get:()=>t(part.noteKey)}
+});
+for (const exercise of Object.values(exercises).flat()) Object.defineProperties(exercise, {
+  name:{get:()=>t(exercise.nameKey)}, recommended:{get:()=>exercise.recommendedKey ? t(exercise.recommendedKey) : null}
+});
 
 // Illustrative movement profiles for the prototype, not measured muscle activation data.
 const muscleShares = {
@@ -134,7 +155,7 @@ function persistHistory() {
 function demoHistory() {
   const daysAgo = [72, 42, 18, 5];
   return levelBodyParts.flatMap((part) => exercises[part.id].slice(0, 3).flatMap((exercise, exerciseIndex) => {
-    const base = parseFloat(exercise.current) || 20;
+    const base = exercise.current.kind === 'bodyweight' ? 20 : exercise.current.value || 20;
     return daysAgo.map((days, index) => {
       const date = new Date(Date.now() - (days + exerciseIndex) * 86400000).toISOString();
       const weight = Math.max(2.5, base - (3 - index) * 2.5);
@@ -160,7 +181,7 @@ state.history = readSavedHistory();
 const sampleHistory = demoHistory();
 
 const titles = [
-  { id: 'momentum-builder', icon: 'MB', name: 'Momentum Builder', state: 'earned', requirement: '完成 50 次训练', progress: 100, earnedDate: '2026 年 9 月 14 日' },
+  { id: 'momentum-builder', icon: 'MB', name: 'Momentum Builder', state: 'earned', requirement: '完成 50 次训练', progress: 100, earnedDate: '2026-09-14T12:00:00Z' },
   { id: 'rising-titan', icon: 'RT', name: 'Rising Titan', state: 'locked', requirement: '身体等级达到 30', progress: 87 },
   { id: 'iron-back', icon: 'IB', name: 'Iron Back', state: 'locked', requirement: '背部等级达到 30', progress: 90 },
   { id: 'chest-warrior', icon: 'CW', name: 'Chest Warrior', state: 'locked', requirement: '胸部等级达到 30', progress: 80 },
@@ -172,6 +193,27 @@ const app = document.querySelector('#app-content');
 const bottomNav = document.querySelector('.bottom-nav');
 const toast = document.querySelector('#toast');
 const frame = document.querySelector('.phone-frame');
+
+function syncLocaleChrome() {
+  document.documentElement.lang = i18n.getLocale();
+  document.title = t('meta.title');
+  document.querySelector('meta[name="description"]')?.setAttribute('content',t('meta.description'));
+  for (const [selector,key] of [['.app-shell','meta.app'],['.status-icons','meta.status'],['#app-content','meta.page'],['.bottom-nav','meta.nav']]) document.querySelector(selector)?.setAttribute('aria-label',t(key));
+  document.querySelectorAll('.nav-item').forEach(button => {
+    const label = t(`nav.${button.dataset.page}`);
+    button.querySelector('span:last-child').textContent = label;
+    button.setAttribute('aria-label',label);
+  });
+}
+function renderLocaleSwitcher() {
+  const locales = i18n.getAvailableLocales();
+  if (locales.length < 2) return '';
+  return `<div class="locale-switcher" aria-label="${h(window.TrackReleaseConfig.allowLocalePreview ? 'locale.preview':'locale.label')}"><span>${h('locale.label')}</span>${locales.map(locale=>`<button data-locale="${locale}" aria-pressed="${i18n.getLocale()===locale}">${locale==='en'?'English':'简体中文'}</button>`).join('')}</div>`;
+}
+function setAppLocale(locale) {
+  if (!i18n.setLocale(locale)) return false;
+  syncLocaleChrome(); render(true); return true;
+}
 
 const icons = {
   home: '<path d="m3 10 9-7 9 7v10H3zM9 20v-7h6v7"/>',
@@ -226,27 +268,27 @@ function exerciseIllustration(exercise) {
 }
 
 function muscleName(id) {
-  return bodyParts.find((part) => part.id === id)?.name || id;
+  return bodyPartName(id);
 }
 
 function muscleShareCard(exercise) {
   const shares = muscleShares[exercise.id];
-  return `<section class="muscle-share" aria-label="${exercise.name}肌群参与示意"><div class="muscle-share-heading"><b>肌群参与</b><small>动作示意占比</small></div><div class="muscle-share-track" aria-hidden="true">${shares.map(([, percent], index) => `<span class="share-tone-${index}" style="width:${percent}%"></span>`).join('')}</div><div class="muscle-share-legend">${shares.map(([id, percent], index) => `<span><i class="share-tone-${index}"></i>${muscleName(id)} <b>${percent}%</b></span>`).join('')}</div><p>示意分配，非肌电或实时测量结果</p></section>`;
+  return `<section class="muscle-share" aria-label="${h('muscles.aria',{exercise:exercise.name})}"><div class="muscle-share-heading"><b>${h('muscles.heading')}</b><small>${h('muscles.illustrative')}</small></div><div class="muscle-share-track" aria-hidden="true">${shares.map(([, percent], index) => `<span class="share-tone-${index}" style="width:${percent}%"></span>`).join('')}</div><div class="muscle-share-legend">${shares.map(([id, percent], index) => `<span><i class="share-tone-${index}"></i>${e(muscleName(id))} <b>${n(percent)}%</b></span>`).join('')}</div><p>${h('muscles.disclaimer')}</p></section>`;
 }
 
 function pageHeader(title, back, action) {
-  return `<header class="page-header">${back ? `<button class="icon-button" data-page="${back}" aria-label="返回">${uiIcon('back')}</button>` : '<div class="wordmark">Track<span class="brand-dot">.</span></div>'}${back ? `<h1>${title}</h1>` : `<div class="header-context">${title}</div>`}${action || `<button class="icon-button" data-action="notifications" aria-label="通知"><span class="notification-dot"></span>${uiIcon('bell')}</button>`}</header>`;
+  return `<header class="page-header">${back ? `<button class="icon-button" data-page="${back}" aria-label="${h('common.back')}">${uiIcon('back')}</button>` : '<div class="wordmark">Track<span class="brand-dot">.</span></div>'}${back ? `<h1>${e(title)}</h1>` : `<div class="header-context">${e(title)}</div>`}${action || `<button class="icon-button" data-action="notifications" aria-label="${h('common.notifications')}"><span class="notification-dot"></span>${uiIcon('bell')}</button>`}</header>`;
 }
 
 function dailyStrain() {
   const percent = Math.min(100, Math.round(state.dailyStrain / state.dailyStrainTarget * 100));
   const remaining = Math.max(0, state.dailyStrainTarget - state.dailyStrain);
-  return `<section class="strain" aria-label="今日训练负荷"><div class="strain-heading"><div><span>DAILY STRAIN</span><b>今日负荷</b></div><strong>${state.dailyStrain}<small>/ ${state.dailyStrainTarget}</small></strong></div><div class="progress-line"><span style="transform:scaleX(${percent / 100})"></span></div><p>${remaining ? `再完成 ${remaining} 点即可达成今日目标` : '今日训练目标已完成'}</p></section>`;
+  return `<section class="strain" aria-label="${h('strain.label')}"><div class="strain-heading"><div><span>${h('strain.kicker')}</span><b>${h('strain.title')}</b></div><strong>${n(state.dailyStrain)}<small>/ ${n(state.dailyStrainTarget)}</small></strong></div><div class="progress-line"><span style="transform:scaleX(${percent / 100})"></span></div><p>${remaining ? h('strain.remaining',{remaining}) : h('strain.complete')}</p></section>`;
 }
 
 function prototypeSwitcher() {
-  return `<div class="prototype-switcher" aria-label="会员状态对比">
-    <span>对比模式</span>
+  return `<div class="prototype-switcher" aria-label="${h('prototype.label')}">
+    <span>${h('prototype.mode')}</span>
     <button class="${state.plan === 'free' ? 'active' : ''}" data-plan="free" aria-pressed="${state.plan === 'free'}">Free</button>
     <button class="${state.plan === 'pro' ? 'active pro' : ''}" data-plan="pro" aria-pressed="${state.plan === 'pro'}">Track Pro</button>
   </div>`;
@@ -254,26 +296,26 @@ function prototypeSwitcher() {
 
 function coachHomeCard() {
   if (state.plan === 'pro') {
-    return `<button class="coach-card active" data-action="open-coach"><span class="coach-monogram">AI</span><span><small>TRACK PRO 私人教练</small><b>今天建议训练胸部</b><em>恢复状态良好，建议中等强度训练 45 分钟。</em></span><i>查看计划 ›</i></button>`;
+    return `<button class="coach-card active" data-action="open-coach"><span class="coach-monogram">AI</span><span><small>${h('coach.label')}</small><b>${h('coach.homeHeading')}</b><em>${h('coach.homeAdvice')}</em></span><i>${h('coach.viewPlan')}</i></button>`;
   }
-  return `<button class="coach-card locked" data-action="open-coach"><span class="coach-monogram">AI</span><span><small>TRACK PRO 私人教练</small><b>今天应该怎么练？</b><em>升级后获取每日计划、实时建议和训练反馈。</em></span><i>了解 Pro ›</i></button>`;
+  return `<button class="coach-card locked" data-action="open-coach"><span class="coach-monogram">AI</span><span><small>${h('coach.label')}</small><b>${h('coach.lockedHeading')}</b><em>${h('coach.lockedAdvice')}</em></span><i>${h('coach.learnPro')}</i></button>`;
 }
 
 function coachLogCard(exercise) {
   if (state.plan === 'pro') {
     const suggestion = state.selectedBodyPart === 'cardio'
-      ? `上次完成 ${exercise.current}。今天先保持舒适节奏，结束后记录实际时长和距离。`
-      : `上次完成 ${exercise.current}。先按上次重量开始，动作稳定后再考虑增加负荷。`;
-    return `<section class="coach-inline"><div><span class="coach-monogram small">AI</span><b>教练建议</b><small>基于你的${exercise.name}记录</small></div><p>${suggestion}</p></section>`;
+      ? h('coach.lastCardio',{metric:formatExerciseMetric(exercise.current)})
+      : h('coach.lastStrength',{metric:formatExerciseMetric(exercise.current)});
+    return `<section class="coach-inline"><div><span class="coach-monogram small">AI</span><b>${h('coach.advice')}</b><small>${h('coach.basedOn',{exercise:exercise.name})}</small></div><p>${suggestion}</p></section>`;
   }
-  return `<button class="coach-inline locked" data-action="open-coach"><div><span class="coach-monogram small">AI</span><b>解锁实时动作建议</b><small>Track Pro</small></div><p>${state.selectedBodyPart === 'cardio' ? 'AI 会根据历史表现建议时长、距离和训练强度。' : 'AI 会根据历史表现建议重量、次数和休息时间。'}</p></button>`;
+  return `<button class="coach-inline locked" data-action="open-coach"><div><span class="coach-monogram small">AI</span><b>${h('coach.unlockAdvice')}</b><small>Track Pro</small></div><p>${h(state.selectedBodyPart === 'cardio' ? 'coach.cardioAdvice' : 'coach.strengthAdvice')}</p></button>`;
 }
 
 function coachCompletionCard() {
   if (state.plan === 'pro') {
-    return `<button class="coach-feedback" data-action="open-coach"><span class="coach-monogram">AI</span><span><small>AI 训练反馈</small><b>已记录本次训练</b><em>教练会根据实际完成情况调整下一次计划。</em></span><i>详细分析 ›</i></button>`;
+    return `<button class="coach-feedback" data-action="open-coach"><span class="coach-monogram">AI</span><span><small>${h('coach.feedback')}</small><b>${h('coach.recorded')}</b><em>${h('coach.adjustNext')}</em></span><i>${h('coach.analysis')}</i></button>`;
   }
-  return `<button class="coach-feedback locked" data-action="open-coach"><span class="coach-monogram">AI</span><span><small>训练反馈已生成</small><b>升级 Track Pro 查看完整分析</b><em>包含训练容量、动作表现和下次调整建议。</em></span><i>解锁 ›</i></button>`;
+  return `<button class="coach-feedback locked" data-action="open-coach"><span class="coach-monogram">AI</span><span><small>${h('coach.feedbackReady')}</small><b>${h('coach.unlockAnalysis')}</b><em>${h('coach.analysisIncludes')}</em></span><i>${h('coach.unlock')}</i></button>`;
 }
 
 function userIdentity(user, options = {}) {
@@ -282,32 +324,32 @@ function userIdentity(user, options = {}) {
 
 function renderHome() {
   // Keep the approved artwork unchanged; real buttons follow its four card bounds.
-  const reference = `<section class="body-reference"><h3 class="visually-hidden">选择一个身体部位开始</h3><img src="assets/body-parts-reference.png" width="1438" height="1093" alt="" aria-hidden="true" draggable="false">${bodyParts.slice(0, 4).map((part) => `<button class="body-card reference-card" data-body-part="${part.id}" aria-label="训练${part.name}" aria-describedby="body-note-${part.id}"><span class="visually-hidden">${part.name}${part.recommended ? '，推荐' : ''}</span><span class="visually-hidden" id="body-note-${part.id}">${part.note}</span></button>`).join('')}</section>`;
-  const armsCore = `<section class="body-reference body-reference-extra" aria-label="手臂与核心训练"><img src="assets/body-parts-arms-core.png" width="1438" height="1094" alt="" aria-hidden="true" draggable="false">${bodyParts.slice(4, 6).map((part) => `<button class="body-card reference-card" data-body-part="${part.id}" aria-label="训练${part.name}" aria-describedby="body-note-${part.id}"><span class="visually-hidden">${part.name}</span><span class="visually-hidden" id="body-note-${part.id}">${part.note}</span></button>`).join('')}</section>`;
-  return `${pageHeader('今天')}<div class="home-intro"><div><span>连续训练 16 天</span><h1>今天练什么？</h1></div><div class="streak-mark"><b>16</b><small>DAY</small></div></div>${dailyStrain()}${coachHomeCard()}<div class="section-title"><h2>今日训练</h2><span>${state.completedExercises.length} 个动作完成</span></div>${reference}${armsCore}<div class="body-grid">${bodyParts.slice(6).map((part) => `<button class="body-card " data-body-part="${part.id}" aria-label="训练${part.name}">${cardioTile()}<span class="body-copy"><b>${part.name}</b><small>${part.note}</small></span><span class="chevron">›</span></button>`).join('')}</div>`;
+  const reference = `<section class="body-reference"><h3 class="visually-hidden">${h('body.choose')}</h3><img src="assets/body-parts-reference.png" width="1438" height="1093" alt="" aria-hidden="true" draggable="false">${bodyParts.slice(0, 4).map((part) => `<button class="body-card reference-card" data-body-part="${part.id}" aria-label="${h('body.train',{part:part.name})}" aria-describedby="body-note-${part.id}"><span class="visually-hidden">${e(part.name)}${part.recommended ? ', '+h('common.recommended') : ''}</span><span class="visually-hidden" id="body-note-${part.id}">${e(part.note)}</span></button>`).join('')}</section>`;
+  const armsCore = `<section class="body-reference body-reference-extra" aria-label="${h('body.armsCore')}"><img src="assets/body-parts-arms-core.png" width="1438" height="1094" alt="" aria-hidden="true" draggable="false">${bodyParts.slice(4, 6).map((part) => `<button class="body-card reference-card" data-body-part="${part.id}" aria-label="${h('body.train',{part:part.name})}" aria-describedby="body-note-${part.id}"><span class="visually-hidden">${e(part.name)}</span><span class="visually-hidden" id="body-note-${part.id}">${e(part.note)}</span></button>`).join('')}</section>`;
+  return `${pageHeader(t('common.today'))}<div class="home-intro"><div><span>${h('home.streak')}</span><h1>${h('home.heading')}</h1></div><div class="streak-mark"><b>16</b><small>${h('common.day')}</small></div></div>${dailyStrain()}${coachHomeCard()}<div class="section-title"><h2>${h('home.quest')}</h2><span>${h('home.completed',{count:state.completedExercises.length})}</span></div>${reference}${armsCore}<div class="body-grid">${bodyParts.slice(6).map((part) => `<button class="body-card " data-body-part="${part.id}" aria-label="${h('body.train',{part:part.name})}">${cardioTile()}<span class="body-copy"><b>${e(part.name)}</b><small>${e(part.note)}</small></span><span class="chevron">›</span></button>`).join('')}</div>`;
 }
 
 function renderExercise() {
   const part = bodyParts.find((item) => item.id === state.selectedBodyPart) || bodyParts[0];
   const list = exercises[part.id];
-  return `${pageHeader(part.name, 'home', '<span class="header-count">' + list.length + ' 个动作</span>')}${dailyStrain()}<div class="section-title"><div><h2>${part.name}动作</h2><p>主要参与比例为原型示意值</p></div></div><div class="exercise-grid">${list.map((item) => { const [primaryId, percent] = muscleShares[item.id][0]; return `<button class="exercise-card ${item.recommended ? 'has-recommendation ' : ''}${state.completedExercises.includes(item.id) ? 'is-complete' : ''}" data-exercise="${item.id}">${item.recommended ? `<span class="recommend-badge">${item.recommended}</span>` : ''}${exerciseIllustration(item)}<span class="exercise-copy"><b>${item.name}</b><small>上次 ${item.current}</small><em>主练 ${muscleName(primaryId)} <strong>${percent}%</strong></em></span><span class="exercise-state">${state.completedExercises.includes(item.id) ? '已完成' : '›'}</span></button>`; }).join('')}</div>${state.completedExercises.length ? '<button class="finish-day" data-action="finish-day">结束今日训练</button>' : ''}`;
+  return `${pageHeader(part.name, 'home', '<span class="header-count">'+h('workout.count',{count:list.length})+'</span>')}${dailyStrain()}<div class="section-title"><div><h2>${h('workout.heading',{part:part.name})}</h2><p>${h('workout.illustrative')}</p></div></div><div class="exercise-grid">${list.map((item) => { const [primaryId, percent] = muscleShares[item.id][0]; return `<button class="exercise-card ${item.recommended ? 'has-recommendation ' : ''}${state.completedExercises.includes(item.id) ? 'is-complete' : ''}" data-exercise="${item.id}">${item.recommended ? `<span class="recommend-badge">${e(item.recommended)}</span>` : ''}${exerciseIllustration(item)}<span class="exercise-copy"><b>${e(item.name)}</b><small>${h('workout.last',{metric:formatExerciseMetric(item.current)})}</small><em>${h('workout.primary',{part:muscleName(primaryId)})} <strong>${n(percent)}%</strong></em></span><span class="exercise-state">${state.completedExercises.includes(item.id) ? h('common.done') : '›'}</span></button>`; }).join('')}</div>${state.completedExercises.length ? '<button class="finish-day" data-action="finish-day">'+h('workout.finish')+'</button>' : ''}`;
 }
 
 function renderLog() {
   const list = exercises[state.selectedBodyPart] || [];
   const exercise = list.find((item) => item.id === state.selectedExercise) || list[0];
-  if (!exercise) return pageHeader('动作未找到', 'home');
+  if (!exercise) return pageHeader(t('workout.notFound'), 'home');
   const isCardio = state.selectedBodyPart === 'cardio';
-  const summary = `<section class="exercise-summary">${exerciseIllustration(exercise)}<div><span>上次训练</span><b>${exercise.current}</b></div><div><span>个人记录</span><b>${exercise.pr}</b></div><button data-action="use-last">使用上次数据</button></section>`;
+  const summary = `<section class="exercise-summary">${exerciseIllustration(exercise)}<div><span>${h('workout.previous')}</span><b>${e(formatExerciseMetric(exercise.current))}</b></div><div><span>${h('workout.pr')}</span><b>${e(formatExerciseMetric(exercise.pr))}</b></div><button data-action="use-last">${h('workout.useLast')}</button></section>`;
   const logger = isCardio
-    ? `<div class="cardio-log"><label><span>时长 (分钟)</span><input type="number" min="0" step="1" inputmode="numeric" data-cardio-input="minutes" value="${state.cardioLog?.minutes ?? exercise.minutes}" aria-label="运动时长"></label><label><span>距离 (公里)</span><input type="number" min="0" step="0.1" inputmode="decimal" data-cardio-input="distance" value="${state.cardioLog?.distance ?? exercise.distance}" aria-label="运动距离"></label></div>`
-    : `<div class="set-table"><div class="set-header"><span>组</span><span>重量 (kg)</span><span>次数</span><span>完成</span></div>${state.workout.sets.map((set, index) => `<div class="set-row ${set.completed ? 'done' : ''}"><b>${index + 1}</b><input value="${set.weight}" inputmode="decimal" enterkeyhint="done" data-set-input="${set.id}" data-field="weight" aria-label="第 ${index + 1} 组重量"><input value="${set.reps}" inputmode="numeric" enterkeyhint="done" data-set-input="${set.id}" data-field="reps" aria-label="第 ${index + 1} 组次数"><button class="set-check" data-set="${set.id}" aria-pressed="${set.completed}" aria-label="完成第 ${index + 1} 组">${set.completed ? '✓' : ''}</button></div>`).join('')}</div><button class="add-set" data-action="add-set"><span>＋</span> 添加一组 <small>复制上一组数据</small></button>`;
-  return `${pageHeader(exercise.name, 'exercise', '<button class="text-button" data-action="more">更多</button>')}${dailyStrain()}${summary}${muscleShareCard(exercise)}${coachLogCard(exercise)}${logger}<div class="sticky-action"><button class="primary-button" data-action="save-exercise">保存动作</button></div>`;
+    ? `<div class="cardio-log"><label><span>${h('workout.duration')}</span><input type="number" min="0" step="1" inputmode="numeric" data-cardio-input="minutes" value="${state.cardioLog?.minutes ?? exercise.minutes}" aria-label="${h('workout.durationAria')}"></label><label><span>${h('workout.distance')}</span><input type="number" min="0" step="0.1" inputmode="decimal" data-cardio-input="distance" value="${state.cardioLog?.distance ?? exercise.distance}" aria-label="${h('workout.distanceAria')}"></label></div>`
+    : `<div class="set-table"><div class="set-header"><span>${h('workout.set')}</span><span>${h('workout.weight')}</span><span>${h('workout.reps')}</span><span>${h('workout.complete')}</span></div>${state.workout.sets.map((set, index) => `<div class="set-row ${set.completed ? 'done' : ''}"><b>${n(index+1)}</b><input value="${set.weight}" inputmode="decimal" enterkeyhint="done" data-set-input="${set.id}" data-field="weight" aria-label="${h('workout.weightAria',{index:index+1})}"><input value="${set.reps}" inputmode="numeric" enterkeyhint="done" data-set-input="${set.id}" data-field="reps" aria-label="${h('workout.repsAria',{index:index+1})}"><button class="set-check" data-set="${set.id}" aria-pressed="${set.completed}" aria-label="${h('workout.completeAria',{index:index+1})}">${set.completed ? '✓' : ''}</button></div>`).join('')}</div><button class="add-set" data-action="add-set"><span>＋</span> ${h('workout.add')} <small>${h('workout.copy')}</small></button>`;
+  return `${pageHeader(exercise.name, 'exercise', '<button class="text-button" data-action="more">'+h('common.more')+'</button>')}${dailyStrain()}${summary}${muscleShareCard(exercise)}${coachLogCard(exercise)}${logger}<div class="sticky-action"><button class="primary-button" data-action="save-exercise">${h('workout.save')}</button></div>`;
 }
 
 function renderComplete() {
   const exercise = exercises[state.selectedBodyPart]?.find((item) => item.id === state.selectedExercise);
-  return `<div class="completion-screen"><div class="completion-symbol"><span>✓</span></div><p class="completion-kicker">TODAY'S QUEST</p><h1>今日训练完成</h1><p>做得很好。你完成了今天的训练目标。</p><div class="reward-grid"><div><b>+320</b><span>XP</span></div><div><b>16</b><span>连续天数</span></div><div><b>100</b><span>DAILY STRAIN</span></div></div><section class="pr-reveal"><span>本次训练</span><div><b>${exercise?.name || '训练已记录'}</b><strong>${state.selectedBodyPart === 'cardio' ? `${state.cardioLog?.minutes || 0} 分钟` : '已完成'}</strong></div></section>${coachCompletionCard()}<div class="completion-actions"><button class="primary-button" data-action="continue-home">继续</button><button class="secondary-button" data-action="share">分享进度</button></div></div>`;
+  return `<div class="completion-screen"><div class="completion-symbol"><span>✓</span></div><p class="completion-kicker">${h('complete.kicker')}</p><h1>${h('complete.heading')}</h1><p>${h('complete.message')}</p><div class="reward-grid"><div><b>+320</b><span>XP</span></div><div><b>16</b><span>${h('complete.streak')}</span></div><div><b>100</b><span>${h('strain.kicker')}</span></div></div><section class="pr-reveal"><span>${h('complete.session')}</span><div><b>${e(exercise?.name || t('complete.recorded'))}</b><strong>${state.selectedBodyPart === 'cardio' ? h('metric.duration',{value:state.cardioLog?.minutes || 0}) : h('common.done')}</strong></div></section>${coachCompletionCard()}<div class="completion-actions"><button class="primary-button" data-action="continue-home">${h('common.continue')}</button><button class="secondary-button" data-action="share">${h('common.share')}</button></div></div>`;
 }
 
 function radarChart() {
@@ -368,7 +410,7 @@ function renderHistory(part, list) {
 }
 
 function renderMuscleRecords(list) {
-  return `<section class="history-intro"><b>个人记录</b><p>各动作的最高表现。下方为原型预设 PR；新训练的重量可在历史中查看。</p></section><div class="strength-list">${list.map((item) => `<article class="strength-row">${exerciseIllustration(item)}<div class="strength-copy"><b>${item.name}</b><span>当前 Lv.${item.level}</span></div><div class="strength-values"><small>个人记录</small><b>${item.pr}</b></div></article>`).join('')}</div>`;
+  return `<section class="history-intro"><b>个人记录</b><p>各动作的最高表现。下方为原型预设 PR；新训练的重量可在历史中查看。</p></section><div class="strength-list">${list.map((item) => `<article class="strength-row">${exerciseIllustration(item)}<div class="strength-copy"><b>${item.name}</b><span>当前 Lv.${item.level}</span></div><div class="strength-values"><small>个人记录</small><b>${e(formatExerciseMetric(item.pr))}</b></div></article>`).join('')}</div>`;
 }
 
 // Refresh only the results so typing never replaces the focused filter input.
@@ -384,7 +426,7 @@ function refreshHistoryResults() {
 function renderMuscle() {
   const part = bodyParts.find((item) => item.id === state.selectedBodyPart) || bodyParts[0];
   const list = exercises[part.id];
-  const current = `<div class="strength-list">${list.slice(0, 5).map((item) => `<article class="strength-row">${exerciseIllustration(item)}<div class="strength-copy"><b>${item.name}</b><span>Lv.${item.level}</span><div class="thin-progress"><i style="width:${Math.min(100, 42 + item.level * 1.6)}%"></i></div></div><div class="strength-values"><small>当前</small><b>${item.current}</b><small>PR ${item.pr}</small></div></article>`).join('')}</div>`;
+  const current = `<div class="strength-list">${list.slice(0, 5).map((item) => `<article class="strength-row">${exerciseIllustration(item)}<div class="strength-copy"><b>${item.name}</b><span>Lv.${item.level}</span><div class="thin-progress"><i style="width:${Math.min(100, 42 + item.level * 1.6)}%"></i></div></div><div class="strength-values"><small>当前</small><b>${e(formatExerciseMetric(item.current))}</b><small>PR ${e(formatExerciseMetric(item.pr))}</small></div></article>`).join('')}</div>`;
   const content = state.activeMuscleTab === 'history' ? renderHistory(part, list) : state.activeMuscleTab === 'records' ? renderMuscleRecords(list) : current;
   return `${pageHeader(part.name + '等级', 'level')}<section class="muscle-heading"><div class="anatomy-mark">${bodyIcon(part.icon)}</div><div><span>当前能力</span><strong><small>Lv.</small>${part.level}</strong><p>根据可测量的力量表现计算</p></div></section><div class="segmented" role="tablist" aria-label="${part.name}详情">${[['current','当前'],['history','历史'],['records','个人记录']].map(([value, label]) => `<button role="tab" data-muscle-tab="${value}" class="${state.activeMuscleTab === value ? 'active' : ''}" aria-selected="${state.activeMuscleTab === value}">${label}</button>`).join('')}</div><div role="tabpanel">${content}</div>`;
 }
@@ -461,9 +503,9 @@ function render(preserveScroll = false) {
   const previousScroll = app.scrollTop;
   const previousPage = app.dataset.view;
   const focused = document.activeElement;
-  const focusAttribute = app.contains(focused) && ['data-set-input', 'data-set', 'data-plan', 'data-muscle-tab', 'data-history-period', 'data-history-metric', 'data-history-exercise', 'data-history-reps', 'data-history-weight', 'data-like', 'data-action'].find((name) => focused.hasAttribute(name));
+  const focusAttribute = app.contains(focused) && ['data-set-input', 'data-cardio-input', 'data-locale', 'data-set', 'data-plan', 'data-muscle-tab', 'data-history-period', 'data-history-metric', 'data-history-exercise', 'data-history-reps', 'data-history-weight', 'data-like', 'data-action'].find((name) => focused.hasAttribute(name));
   const focusSelector = focusAttribute ? `[${focusAttribute}="${focused.getAttribute(focusAttribute)}"]${focused.dataset.field ? `[data-field="${focused.dataset.field}"]` : ''}` : null;
-  app.innerHTML = prototypeSwitcher() + (views[state.page] || renderHome)();
+  app.innerHTML = renderLocaleSwitcher() + prototypeSwitcher() + (views[state.page] || renderHome)();
   app.dataset.view = state.page;
   app.scrollTop = preserveScroll ? previousScroll : 0;
   const activeRoot = rootPages[state.page];
@@ -523,12 +565,14 @@ document.addEventListener('keydown', (event) => {
 });
 
 document.addEventListener('click', (event) => {
+  const localeTarget = event.target.closest('[data-locale]');
+  if (localeTarget) { setAppLocale(localeTarget.dataset.locale); return; }
   const planTarget = event.target.closest('[data-plan]');
   if (planTarget) {
     setPlan(state, planTarget.dataset.plan);
     if (state.plan === 'free' && state.page === 'coach') navigate(state, 'home');
     render(app.dataset.view === state.page);
-    showToast(state.plan === 'pro' ? '正在预览 Track Pro 体验' : '正在预览免费版体验');
+    showToast(t(state.plan === 'pro' ? 'toast.pro' : 'toast.free'));
     return;
   }
   const pageTarget = event.target.closest('[data-page]');
@@ -556,7 +600,7 @@ document.addEventListener('click', (event) => {
     if (!selected) return;
     if (state.selectedExercise !== selected.id) {
       if (state.selectedBodyPart === 'cardio') state.cardioLog = { minutes: selected.minutes, distance: selected.distance };
-      else state.workout.sets = [{ id: 1, weight: Number(selected.current) || 0, reps: 8, completed: false }];
+      else state.workout.sets = [{ id: 1, weight: metricWeight(selected.current), reps: 8, completed: false }];
     }
     navigate(state, 'log', { exerciseId: selected.id }); render(); return;
   }
@@ -576,28 +620,29 @@ document.addEventListener('click', (event) => {
     const selected = exercises[state.selectedBodyPart]?.find((item) => item.id === state.selectedExercise);
     if (!selected) return;
     if (state.selectedBodyPart === 'cardio') state.cardioLog = { minutes: selected.minutes, distance: selected.distance };
-    else { state.workout.sets[0].weight = Number(selected.current) || 0; state.workout.sets[0].reps = 8; }
-    render(true); showToast('已填入上次训练数据');
+    else { state.workout.sets[0].weight = metricWeight(selected.current); state.workout.sets[0].reps = 8; }
+    render(true); showToast(t('toast.useLast'));
   }
-  if (action === 'save-exercise') { saveExercise(state); persistHistory(); render(); showToast('动作已保存，历史记录已更新'); }
+  if (action === 'save-exercise') { saveExercise(state); persistHistory(); render(); showToast(t('toast.saved')); }
   if (action === 'history-reset') { Object.assign(state.historyFilters, { period: '90', exerciseId: 'all', reps: 'all', minWeight: '', maxWeight: '', metric: 'weight' }); render(true); }
   if (action === 'finish-day') { state.dailyStrain = 100; navigate(state, 'complete'); render(); }
   if (action === 'continue-home') { state.dailyStrain = 32; state.completedExercises = []; state.workout.sets = [{ id: 1, weight: 70, reps: 8, completed: false }]; state.cardioLog = null; state.selectedExercise = 'bench-press'; navigate(state, 'home'); render(); }
   if (action === 'open-explore') { navigate(state, 'explore'); render(); }
   if (action === 'open-coach') { navigate(state, state.plan === 'pro' ? 'coach' : 'subscription'); render(); }
   if (action === 'clear-search') { state.recentSearches = []; render(); }
-  if (action === 'notifications') showToast('没有新的训练提醒');
-  if (action === 'comments') showToast('评论将在下一阶段接入');
-  if (action === 'share') showToast('分享卡片已准备好');
-  if (action === 'set-title') showToast('已设为当前称号');
-  if (action === 'coach-answer') showToast('AI 教练正在结合你的训练记录回答');
-  if (action === 'upgrade') { setPlan(state, 'pro'); navigate(state, 'coach'); render(); showToast('已切换到 Track Pro 原型'); }
+  if (action === 'notifications') showToast(t('toast.notifications'));
+  if (action === 'comments') showToast(t('toast.comments'));
+  if (action === 'share') showToast(t('toast.share'));
+  if (action === 'set-title') showToast(t('toast.title'));
+  if (action === 'coach-answer') showToast(t('toast.coach'));
+  if (action === 'upgrade') { setPlan(state, 'pro'); navigate(state, 'coach'); render(); showToast(t('toast.upgrade')); }
 });
 
 function updateClock() {
   const now = new Date();
   document.querySelector('#clock').textContent = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
 }
+syncLocaleChrome();
 updateClock();
 setInterval(updateClock, 30000);
 render();

@@ -6,16 +6,8 @@ const vm = require('node:vm');
 const { createHash } = require('node:crypto');
 
 const root = path.resolve(__dirname, '..');
-function loadUI() {
-  const node = () => ({ innerHTML: '', textContent: '', scrollTop: 0, dataset: {}, classList: { toggle() {}, add() {}, remove() {} }, setAttribute() {}, removeAttribute() {}, contains: () => false, querySelector: () => null });
-  const app = node();
-  const nav = ['home', 'level', 'social', 'profile'].map((page) => ({ ...node(), dataset: { page } }));
-  const nodes = { '#app-content': app, '.bottom-nav': node(), '#toast': node(), '#clock': node(), '.phone-frame': node() };
-  const handlers = {};
-  const context = vm.createContext({ window: { TrackCore: require('../core.js') }, document: { activeElement: null, createElement: node, querySelector: (s) => nodes[s], querySelectorAll: (s) => s === '.nav-item' ? nav : [], addEventListener(type, handler) { (handlers[type] ||= []).push(handler); } }, localStorage: { getItem: () => null, setItem() {} }, setInterval() {}, setTimeout() {}, clearTimeout() {}, Intl, Date });
-  vm.runInContext(fs.readFileSync(path.join(root, 'app.js'), 'utf8'), context);
-  return { context, app, nodes, handlers };
-}
+const {loadUI: loadLocalizedUI} = require('./helpers/load-ui.js');
+const loadUI = () => loadLocalizedUI({locale:'zh-CN',allowLocalePreview:true});
 
 test('all existing screens render in both Free and Pro states', () => {
   const { context } = loadUI();

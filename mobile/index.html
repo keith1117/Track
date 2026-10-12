@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#071013" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#071013" />
     <meta name="color-scheme" content="dark" />
-    <meta name="description" content="Track，把每一次训练变成看得见的成长" />
+    <meta name="description" content="Track turns every workout into visible progress." />
     <title>Track | Turn Progress Into a Stronger You</title>
     <link rel="stylesheet" href="styles.css?v=11" />
   </head>
@@ -19,32 +19,35 @@
         <div class="dynamic-island" aria-hidden="true"></div>
         <header class="status-bar" aria-hidden="true">
           <span id="clock">9:41</span>
-          <div class="status-icons" aria-label="网络和电池状态">
+          <div class="status-icons" aria-label="Network and battery status">
             <span>▮▮▮</span><span>⌁</span><span class="battery"></span>
           </div>
         </header>
 
-        <section id="app-content" class="app-content" aria-label="当前页面"></section>
+        <section id="app-content" class="app-content" aria-label="Current page"></section>
 
-        <nav class="bottom-nav" aria-label="主导航">
-          <button class="nav-item active" data-page="home" aria-label="首页">
-            <span class="nav-icon" data-icon="home"></span><span>首页</span>
+        <nav class="bottom-nav" aria-label="Main navigation">
+          <button class="nav-item active" data-page="home" aria-label="Home">
+            <span class="nav-icon" data-icon="home"></span><span>Home</span>
           </button>
-          <button class="nav-item" data-page="level" aria-label="等级">
-            <span class="nav-icon" data-icon="chart"></span><span>等级</span>
+          <button class="nav-item" data-page="level" aria-label="Level">
+            <span class="nav-icon" data-icon="chart"></span><span>Level</span>
           </button>
-          <button class="nav-item" data-page="social" aria-label="社区">
-            <span class="nav-icon" data-icon="users"></span><span>社区</span>
+          <button class="nav-item" data-page="social" aria-label="Community">
+            <span class="nav-icon" data-icon="users"></span><span>Community</span>
           </button>
-          <button class="nav-item" data-page="profile" aria-label="我的">
-            <span class="nav-icon" data-icon="user"></span><span>我的</span>
+          <button class="nav-item" data-page="profile" aria-label="Profile">
+            <span class="nav-icon" data-icon="user"></span><span>Profile</span>
           </button>
         </nav>
         <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
       </div>
     </main>
 
+    <script src="release-config.js?v=1"></script>
+    <script src="locales/messages.js?v=1"></script>
+    <script src="i18n.js?v=1"></script>
     <script src="core.js?v=6"></script>
-    <script src="app.js?v=11"></script>
+    <script src="app.js?v=12"></script>
   </body>
 </html>

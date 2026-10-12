@@ -3,14 +3,13 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const {loadUI} = require('./helpers/load-ui.js');
 
 const mobileRoot = path.resolve(__dirname, '..');
 const corePath = path.join(mobileRoot, 'core.js');
 
 test('each training area has its own usable exercise list', () => {
-  const appSource = fs.readFileSync(path.join(mobileRoot, 'app.js'), 'utf8');
-  const catalogSource = appSource.slice(appSource.indexOf('const bodyParts ='), appSource.indexOf('const users ='));
-  const { bodyParts, exercises } = vm.runInNewContext(`${catalogSource}\n({ bodyParts, exercises })`);
+  const { bodyParts, exercises } = loadUI().run('({bodyParts,exercises})');
   const ids = [];
 
   for (const part of bodyParts) {
@@ -26,9 +25,7 @@ test('each training area has its own usable exercise list', () => {
 });
 
 test('every exercise has a complete illustrative muscle distribution', () => {
-  const appSource = fs.readFileSync(path.join(mobileRoot, 'app.js'), 'utf8');
-  const catalogSource = appSource.slice(appSource.indexOf('const bodyParts ='), appSource.indexOf('const users ='));
-  const { bodyParts, exercises, muscleShares } = vm.runInNewContext(`${catalogSource}\n({ bodyParts, exercises, muscleShares })`);
+  const { bodyParts, exercises, muscleShares } = loadUI().run('({bodyParts,exercises,muscleShares})');
   const muscleIds = new Set(bodyParts.filter((part) => part.id !== 'cardio').map((part) => part.id));
 
   for (const exercise of Object.values(exercises).flat()) {
