@@ -87,25 +87,17 @@ test('training-area clicks reach the exercise list rather than matching the page
   assert.equal(app.dataset.page, undefined);
 });
 
-test('the four reference cards reuse the exact approved image with real training buttons', () => {
-  const { context, handlers } = loadUI();
-  const html = vm.runInContext('renderHome()', context);
-  assert.match(html, /class="body-reference"/);
-  assert.match(html, /src="assets\/body-parts-reference.png" width="1438" height="1093" alt="" aria-hidden="true"/);
-  const originalPanel = html.match(/<section class="body-reference">([\s\S]*?)<\/section>/)[1];
-  assert.equal((originalPanel.match(/class="body-card reference-card/g) || []).length, 4);
-  for (const part of ['chest', 'back', 'shoulders', 'legs']) {
-    assert.match(html, new RegExp(`data-body-part="${part}" aria-label="训练`));
-    const button = { dataset: { bodyPart: part } };
-    handlers.click[0]({ target: { closest: (s) => s === '[data-body-part]' ? button : null } });
-    assert.equal(vm.runInContext('state.selectedBodyPart', context), part);
-    assert.equal(vm.runInContext('state.page', context), 'exercise');
+test('body cards preserve the original artwork files and real training routes', () => {
+  const ui = loadLocalizedUI();
+  const html = ui.run('renderHome()');
+  for (const part of ['chest','back','shoulders','legs','arms','abs']) {
+    assert.match(html,new RegExp(`data-body-part="${part}" aria-label="Train`));
+    ui.dispatchClick({bodyPart:part});
+    assert.equal(ui.run('state.selectedBodyPart'),part);assert.equal(ui.run('state.page'),'exercise');
   }
-  const asset = fs.readFileSync(path.join(root, 'assets', 'body-parts-reference.png'));
-  assert.equal(createHash('sha256').update(asset).digest('hex'), '5e8dada91105f352db3301c43ec9f1804be56090b031923fa65adb711b4a1488');
-  const css = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
-  assert.match(css, /\.body-reference > img \{[^}]*width: 100%[^}]*height: auto/);
-  assert.match(css, /\.body-reference \.reference-card \{[^}]*position: absolute[^}]*background: transparent/);
+  for(const [file,hash] of [['body-parts-reference.png','5e8dada91105f352db3301c43ec9f1804be56090b031923fa65adb711b4a1488'],['body-parts-arms-core.png','7c1fe9a720f40fb784299f8512f94462ec4f1734cb8929ca608061cdfde0d550']]) {
+    assert.equal(createHash('sha256').update(fs.readFileSync(path.join(root,'assets',file))).digest('hex'),hash);
+  }
 });
 
 test('the cardio card uses a decorative monochrome runner without target highlighting', () => {
@@ -163,27 +155,16 @@ test('chest illustrations reuse approved artwork with eight distinct crop region
   }
 });
 
-test('arms and core use matching reference cards and retain separate training routes', () => {
-  const { context, handlers } = loadUI();
-  const html = vm.runInContext('renderHome()', context);
-  const extraPanel = html.match(/<section class="body-reference body-reference-extra"[^>]*>([\s\S]*?)<\/section>/);
-  assert.ok(extraPanel, 'the new cards share the reference-panel format');
-  assert.match(extraPanel[1], /src="assets\/body-parts-arms-core.png" width="1438" height="1094"/);
-  assert.equal((extraPanel[1].match(/class="body-card reference-card/g) || []).length, 2);
-  assert.doesNotMatch(extraPanel[1], /anatomy-tile|body-copy/);
-  for (const [part, name] of [['arms', '手臂'], ['abs', '核心']]) {
-    assert.match(extraPanel[1], new RegExp(`data-body-part="${part}" aria-label="训练${name}" aria-describedby="body-note-${part}"`));
-    const button = { dataset: { bodyPart: part } };
-    handlers.click[0]({ target: { closest: (s) => s === '[data-body-part]' ? button : null } });
-    assert.equal(vm.runInContext('state.selectedBodyPart', context), part);
-    assert.equal(vm.runInContext('state.page', context), 'exercise');
+test('all six body crops fit the real edited image dimensions with one card format', () => {
+  const ui = loadLocalizedUI();
+  assert.equal(ui.run('typeof bodyIllustrationCrops'),'object');
+  const crops=JSON.parse(ui.run('JSON.stringify(bodyIllustrationCrops)'));
+  assert.equal(Object.keys(crops).length,6);
+  for(const [part,crop]of Object.entries(crops)) {
+    const png=fs.readFileSync(path.join(root,crop.source));
+    assert.equal(crop.imageWidth,png.readUInt32BE(16));assert.equal(crop.imageHeight,png.readUInt32BE(20));
+    assert.ok(crop.left>=0&&crop.top>=0&&crop.left+crop.width<=crop.imageWidth&&crop.top+crop.height<=crop.imageHeight);
+    const card=ui.run(`renderBodyPartCard(bodyParts.find(p=>p.id==='${part}'))`);
+    assert.match(card,/body-part-illustration/);assert.match(card,/class="body-copy"/);
   }
-  const asset = fs.readFileSync(path.join(root, 'assets', 'body-parts-arms-core.png'));
-  assert.equal(asset.readUInt32BE(16), 1438);
-  assert.equal(asset.readUInt32BE(20), 1094);
-  const css = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
-  assert.match(css, /\.body-reference-extra \{[^}]*aspect-ratio: 1438 \/ 449/);
-  assert.match(css, /\.body-reference-extra > img \{[^}]*top: -135\.8575%/);
-  assert.match(css, /\.reference-card\[data-body-part="arms"\] \{[^}]*left: 4\.5202%[^}]*top: 0/);
-  assert.match(css, /\.reference-card\[data-body-part="abs"\] \{[^}]*left: 50\.9736%[^}]*top: 0/);
 });

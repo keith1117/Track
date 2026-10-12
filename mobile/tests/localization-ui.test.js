@@ -2,6 +2,20 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const {loadUI} = require('./helpers/load-ui.js');
 const pages=['home','exercise','log','complete','coach','level','muscle','titles','title-detail','social','search','explore','public-profile','profile','stats','achievements','settings','subscription'];
+test('six body cards use text-free cropped art and independently localized real controls', () => {
+  for(const locale of ['en','zh-CN']) {
+    const ui=loadUI({locale,allowLocalePreview:true});
+    assert.equal(ui.run('typeof renderBodyPartCard'),'function','body art has not been separated from labels');
+    for(const id of ['chest','back','shoulders','legs','arms','abs']) {
+      const card=ui.run(`renderBodyPartCard(bodyParts.find(part=>part.id==='${id}'))`);
+      assert.match(card,new RegExp(`data-body-part="${id}"`));
+      assert.match(card,/body-part-illustration/);assert.match(card,/class="body-copy"/);
+      assert.match(card,/body-parts-clean-/);
+      if(locale==='en')assert.doesNotMatch(card,/[\u3400-\u9fff]/);
+      ui.dispatchClick({bodyPart:id});assert.equal(ui.run('state.selectedBodyPart'),id);
+    }
+  }
+});
 for(const page of pages) test(`${page} renders complete bilingual copy in Free and Pro`, () => {
   for(const locale of ['en','zh-CN']) {
     const ui=loadUI({locale,allowLocalePreview:true});

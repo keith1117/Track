@@ -87,19 +87,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, .radar-label:fo
 .section-title > span, .section-title > b { color: var(--muted); font-size: 12px; font-weight: 500; }
 
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-.body-reference { position: relative; isolation: isolate; }
-.body-reference > img { display: block; width: 100%; height: auto; pointer-events: none; user-select: none; }
-.body-reference .reference-card { position: absolute; min-height: 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
-.reference-card[data-body-part="chest"] { left: 4.5202%; top: 7.8683%; width: 45.0626%; height: 46.2946%; border-radius: 6.7% / 8.6%; }
-.reference-card[data-body-part="back"] { left: 50.9736%; top: 7.7768%; width: 44.5758%; height: 46.3861%; border-radius: 6.7% / 8.6%; }
-.reference-card[data-body-part="shoulders"] { left: 4.5202%; top: 55.9012%; width: 44.9930%; height: 40.8051%; border-radius: 6.7% / 9.6%; }
-.reference-card[data-body-part="legs"] { left: 50.9736%; top: 55.8097%; width: 44.5758%; height: 40.8966%; border-radius: 6.7% / 9.6%; }
-.body-reference-extra { aspect-ratio: 1438 / 449; overflow: hidden; margin-top: -.9736%; margin-bottom: 10px; }
-.body-reference-extra > img { position: absolute; left: 0; top: -135.8575%; }
-.reference-card[data-body-part="arms"] { left: 4.5202%; top: 0; width: 44.9930%; height: 100%; border-radius: 6.7% / 9.6%; }
-.reference-card[data-body-part="abs"] { left: 50.9736%; top: 0; width: 44.5758%; height: 100%; border-radius: 6.7% / 9.6%; }
-.body-reference .reference-card:focus-visible { outline: 2px solid var(--green); outline-offset: -4px; }
-.body-reference .reference-card:active { transform: none; background: rgba(255, 255, 255, .07); }
+.body-part-illustration { position: relative; display: block; width: 100%; flex-shrink: 0; overflow: hidden; pointer-events: none; user-select: none; mix-blend-mode: lighten; }
+.body-part-illustration > img { position: absolute; display: block; max-width: none; height: auto; }
+.body-grid .anatomy-card { flex-direction: column; align-items: stretch; justify-content: flex-start; padding-top: 32px; }
+.anatomy-card .body-copy { margin-top: auto; padding-top: 8px; }
 .body-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .body-grid .body-card { position: relative; min-height: 202px; display: flex; align-items: flex-end; padding: 14px; overflow: hidden; text-align: left; border: 1px solid #2a3d44; border-radius: var(--radius); background: #0c181c; }
 .body-card .body-copy { position: relative; z-index: 1; padding-right: 16px; }

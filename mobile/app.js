@@ -323,11 +323,24 @@ function userIdentity(user, options = {}) {
   return `<button class="identity ${options.compact ? 'compact' : ''}" data-user="${options.clickable === false ? '' : 'alex'}"><span class="avatar">${user.initials}</span><span class="identity-copy"><b>${e(user.name)}</b><small>${e(user.handle)}</small><em>Lv.${user.level} <i></i> ${e(user.title)}</em></span>${options.follow ? `<span class="follow">${h('common.follow')}</span>` : ''}</button>`;
 }
 
+const bodyIllustrationCrops = {
+  chest:{source:'assets/body-parts-clean-reference.png',imageWidth:1438,imageHeight:1094,left:90,top:90,width:600,height:460},
+  back:{source:'assets/body-parts-clean-reference.png',imageWidth:1438,imageHeight:1094,left:760,top:90,width:600,height:460},
+  shoulders:{source:'assets/body-parts-clean-reference.png',imageWidth:1438,imageHeight:1094,left:90,top:595,width:600,height:460},
+  legs:{source:'assets/body-parts-clean-reference.png',imageWidth:1438,imageHeight:1094,left:760,top:595,width:600,height:460},
+  arms:{source:'assets/body-parts-clean-arms-core.png',imageWidth:1437,imageHeight:1094,left:90,top:595,width:600,height:460},
+  abs:{source:'assets/body-parts-clean-arms-core.png',imageWidth:1437,imageHeight:1094,left:760,top:595,width:600,height:460}
+};
+function bodyPartIllustration(id) {
+  const crop = bodyIllustrationCrops[id];
+  return `<span class="body-part-illustration" aria-hidden="true" style="aspect-ratio:${crop.width}/${crop.height}"><img src="${crop.source}" width="${crop.imageWidth}" height="${crop.imageHeight}" alt="" aria-hidden="true" loading="lazy" decoding="async" draggable="false" style="width:${crop.imageWidth/crop.width*100}%;left:${-crop.left/crop.width*100}%;top:${-crop.top/crop.height*100}%"></span>`;
+}
+function renderBodyPartCard(part) {
+  return `<button class="body-card anatomy-card${part.recommended ? ' recommended' : ''}" data-body-part="${part.id}" aria-label="${h('body.train',{part:part.name})}" aria-describedby="body-note-${part.id}">${part.recommended ? `<span class="recommend-badge">${h('common.recommended')}</span>` : ''}${bodyPartIllustration(part.id)}<span class="body-copy"><b>${e(part.name)}</b><small id="body-note-${part.id}">${e(part.note)}</small></span><span class="chevron" aria-hidden="true">›</span></button>`;
+}
+
 function renderHome() {
-  // Keep the approved artwork unchanged; real buttons follow its four card bounds.
-  const reference = `<section class="body-reference"><h3 class="visually-hidden">${h('body.choose')}</h3><img src="assets/body-parts-reference.png" width="1438" height="1093" alt="" aria-hidden="true" draggable="false">${bodyParts.slice(0, 4).map((part) => `<button class="body-card reference-card" data-body-part="${part.id}" aria-label="${h('body.train',{part:part.name})}" aria-describedby="body-note-${part.id}"><span class="visually-hidden">${e(part.name)}${part.recommended ? ', '+h('common.recommended') : ''}</span><span class="visually-hidden" id="body-note-${part.id}">${e(part.note)}</span></button>`).join('')}</section>`;
-  const armsCore = `<section class="body-reference body-reference-extra" aria-label="${h('body.armsCore')}"><img src="assets/body-parts-arms-core.png" width="1438" height="1094" alt="" aria-hidden="true" draggable="false">${bodyParts.slice(4, 6).map((part) => `<button class="body-card reference-card" data-body-part="${part.id}" aria-label="${h('body.train',{part:part.name})}" aria-describedby="body-note-${part.id}"><span class="visually-hidden">${e(part.name)}</span><span class="visually-hidden" id="body-note-${part.id}">${e(part.note)}</span></button>`).join('')}</section>`;
-  return `${pageHeader(t('common.today'))}<div class="home-intro"><div><span>${h('home.streak')}</span><h1>${h('home.heading')}</h1></div><div class="streak-mark"><b>16</b><small>${h('common.day')}</small></div></div>${dailyStrain()}${coachHomeCard()}<div class="section-title"><h2>${h('home.quest')}</h2><span>${h('home.completed',{count:state.completedExercises.length})}</span></div>${reference}${armsCore}<div class="body-grid">${bodyParts.slice(6).map((part) => `<button class="body-card " data-body-part="${part.id}" aria-label="${h('body.train',{part:part.name})}">${cardioTile()}<span class="body-copy"><b>${e(part.name)}</b><small>${e(part.note)}</small></span><span class="chevron">›</span></button>`).join('')}</div>`;
+  return `${pageHeader(t('common.today'))}<div class="home-intro"><div><span>${h('home.streak')}</span><h1>${h('home.heading')}</h1></div><div class="streak-mark"><b>16</b><small>${h('common.day')}</small></div></div>${dailyStrain()}${coachHomeCard()}<div class="section-title"><h2>${h('home.quest')}</h2><span>${h('home.completed',{count:state.completedExercises.length})}</span></div><h3 class="visually-hidden">${h('body.choose')}</h3><div class="body-grid">${bodyParts.slice(0,6).map(renderBodyPartCard).join('')}${bodyParts.slice(6).map((part) => `<button class="body-card " data-body-part="${part.id}" aria-label="${h('body.train',{part:part.name})}">${cardioTile()}<span class="body-copy"><b>${e(part.name)}</b><small>${e(part.note)}</small></span><span class="chevron" aria-hidden="true">›</span></button>`).join('')}</div>`;
 }
 
 function renderExercise() {
