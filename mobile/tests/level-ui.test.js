@@ -45,6 +45,23 @@ test('Progress is a read-only Level route with the same XP numbers and preserved
   ui.dispatchClick({page:'level'});assert.equal(ui.run('state.page'),'level');
 });
 
+test('inspecting locked titles cannot change the sample current title shown in Progress',()=>{
+  for(const locale of ['en','zh-CN']) {
+    const ui=loadUI({locale,allowLocalePreview:true});
+    ui.dispatchClick({page:'level'});ui.dispatchClick({page:'progress'});
+    const before=ui.app.innerHTML;
+    assert.match(before,/<b>Momentum Builder<\/b>/);
+    for(const id of ['rising-titan','iron-back','chest-warrior','consistency-pro','all-rounder']) {
+      ui.dispatchClick({page:'titles'});ui.dispatchClick({title:id});
+      assert.equal(ui.run('state.page'),'title-detail');
+      assert.equal(ui.run('state.selectedTitle'),id);
+      ui.dispatchClick({page:'titles'});ui.dispatchClick({page:'level'});ui.dispatchClick({page:'progress'});
+      assert.equal(ui.app.innerHTML,before,`${locale}: inspecting ${id} is not equipping it`);
+    }
+    assert.ok(ui.storageWrites.every(write=>write.key!=='track.training-history.v1'));
+  }
+});
+
 test('six strength areas keep their existing numeric Muscle details',()=>{
   const ui=loadUI();
   for(const id of ['chest','back','shoulders','legs','arms','abs']) {

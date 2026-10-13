@@ -381,7 +381,7 @@ function renderLevel() {
 function renderProgress() {
   const {strengthRank,experience}=SAMPLE_LEVEL_SUMMARY;
   const progress=getExperienceProgress(experience.currentXP,experience.nextXP);
-  const title=titles.find(item=>item.id===state.selectedTitle)||titles[0];
+  const title=titles.find(item=>item.id==='momentum-builder');
   return `${pageHeader(t('progress.heading'),'level')}<section class="progress-detail"><span class="level-sample">${h('level.sampleData')}</span><h1>${h('level.experienceLevel')}</h1><strong class="progress-level">${h('common.level',{level:n(experience.level)})}</strong><div class="progress-line"><span style="transform:scaleX(${progress.fraction})"></span></div><p>${n(experience.currentXP)} / ${n(experience.nextXP)} XP</p><b>${h('progress.remaining',{xp:n(progress.remaining)})}</b></section><section class="progress-explanation"><h2>${h('progress.separateHeading')}</h2><p>${h('progress.separateCopy')}</p><div class="progress-rank">${rankBadgeSVG(strengthRank.badge)}<span><small>${h('level.strengthRank')}</small><b>${h(strengthRank.nameKey)}</b></span></div><p class="sample-note">${h('progress.sampleCopy')}</p></section><button class="current-title" data-page="titles"><span class="title-medal">${e(title.icon)}</span><span><small>${h('level.currentTitle')}</small><b>${e(title.name)}</b><em>${h('progress.titlesCopy')}</em></span><i aria-hidden="true">›</i></button>`;
 }
 
