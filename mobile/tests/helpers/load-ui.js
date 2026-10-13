@@ -8,7 +8,7 @@ function loadUI({locale='en', allowLocalePreview=false, publicLocales=['en'], re
     return {innerHTML:'',textContent:'',scrollTop:0,dataset:{},classList:{toggle(){},add(){},remove(){}},
       setAttribute(name,value){attributes[name]=String(value);},removeAttribute(name){delete attributes[name];},
       getAttribute:name=>attributes[name],hasAttribute:name=>Object.hasOwn(attributes,name),
-      contains:()=>false,querySelector:()=>null,focus(){}};
+      contains:()=>false,querySelector:()=>null,querySelectorAll:()=>[],focus(){}};
   };
   const app = node();
   const nav = ['home','level','social','profile'].map(page=>{const label=node();return {...node(),dataset:{page},label,querySelector:()=>label};});
@@ -22,7 +22,7 @@ function loadUI({locale='en', allowLocalePreview=false, publicLocales=['en'], re
     localStorage:{getItem(key){if(storageThrows)throw Error('blocked');return stored.get(key) ?? null;},setItem(key,value){if(storageThrows)throw Error('blocked');stored.set(key,value);storageWrites.push({key,value});}},
     setInterval(){},setTimeout(){},clearTimeout(){},Intl,Date,URLSearchParams,console});
   context.window=context;
-  for (const file of ['release-config.js','locales/messages.js','i18n.js','core.js','level-presentation.js']) vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context,{filename:file});
+  for (const file of ['release-config.js','locales/messages.js','i18n.js','core.js','level-presentation.js','level-art.js']) vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context,{filename:file});
   Object.assign(context.TrackReleaseConfig,{allowLocalePreview,publicLocales,regionProfile});
   vm.runInContext(fs.readFileSync(path.join(root,'app.js'),'utf8'),context,{filename:'app.js'});
   const run = source => vm.runInContext(source,context);

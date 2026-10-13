@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><base href="../../"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Level artwork QA</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;padding:24px;background:#071013;color:#e9f0f1;font:15px system-ui}h1{font-size:24px}button,select{font:inherit;min-height:44px;border-radius:8px;padding:8px;background:#192a30;color:inherit;border:1px solid #43575f}button[aria-pressed=true]{border-color:#b49af6}nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}.card{border:1px solid #2d4148;border-radius:16px;padding:12px;min-width:0}.pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}.pair canvas{width:100%;height:auto;display:block}.status{font-size:12px;color:#b1c0c5}.small .pair{width:180px;margin:auto}b{display:block;margin-bottom:6px}
+</style></head><body>
+<h1>Level artwork · source / colored</h1><p>Local QA only. Original files stay unchanged. Check contours, background and muscle boundaries.</p>
+<nav aria-label="Color band"><button data-tone="green">Lv.1–9 · Green</button><button data-tone="blue">Lv.10–19 · Blue</button><button data-tone="purple" aria-pressed="true">Lv.20–29 · Purple</button><button data-tone="gold">Lv.30–39 · Gold</button><button data-tone="ice">Lv.40+ · Ice</button><button data-tone="neutral">Not assessed</button><button id="size" aria-pressed="false">Small card preview</button></nav>
+<p id="result" role="status">Loading…</p><section class="board" id="board"></section>
+<script src="level-presentation.js"></script><script src="level-art.js"></script><script>
+  const board=document.querySelector('#board');let generation=0;
+  async function show(tone){
+    const ticket=++generation;document.querySelector('#result').textContent='Loading…';
+    board.innerHTML=Object.keys(TrackLevelArt.BODY_CROPS).map(id=>`<article class="card"><b>${id}</b><div class="pair"><canvas data-source="${id}"></canvas><span data-level-art="${id}" data-tone="${tone}" aria-hidden="true"></span></div><p class="status">Checking…</p></article>`).join('');
+    await TrackLevelArt.hydrateLevelArt(board);if(ticket!==generation)return;
+    let outside=0,changed=0,anchors=0,failures=0;
+    for(const original of board.querySelectorAll('[data-source]')){
+      const crop=TrackLevelArt.BODY_CROPS[original.dataset.source];const image=new Image();image.src=crop.source;
+      try{await image.decode();if(ticket!==generation)return;original.width=crop.width;original.height=crop.height;
+        const ctx=original.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,crop.left,crop.top,crop.width,crop.height,0,0,crop.width,crop.height);
+        const colored=original.parentElement.querySelector('[data-level-art] canvas');if(!colored)throw Error('Artwork unavailable');
+        const a=ctx.getImageData(0,0,600,460).data,b=colored.getContext('2d').getImageData(0,0,600,460).data;
+        let localOutside=0,localChanged=0,localAnchors=0,backgroundChanges=0;
+        for(let i=0;i<a.length;i+=4){const different=a[i]!==b[i]||a[i+1]!==b[i+1]||a[i+2]!==b[i+2]||a[i+3]!==b[i+3];
+          if(different)localChanged++;if(different&&(a[i+1]<=Math.max(a[i],a[i+2])||a[i+1]-Math.min(a[i],a[i+2])<=8||(a[i+1]-Math.min(a[i],a[i+2]))/a[i+1]<=.15))localOutside++;
+          const x=(i/4)%600,y=Math.floor(i/2400);if(different&&(x<8||x>=592||y<8||y>=452))backgroundChanges++;
+          if(a[i]>150&&a[i+1]>150&&a[i+2]>150&&Math.max(a[i],a[i+1],a[i+2])-Math.min(a[i],a[i+1],a[i+2])<25){localAnchors++;if(different)localOutside++;}}
+        outside+=localOutside+backgroundChanges;changed+=localChanged;anchors+=localAnchors;
+        original.closest('.card').querySelector('.status').textContent=`Changed ${localChanged} · outside ${localOutside} · silver anchors ${localAnchors} · background changes ${backgroundChanges}`;
+      }catch(error){failures++;original.closest('.card').querySelector('.status').textContent=error.message;}
+    }
+    if(ticket===generation)document.querySelector('#result').textContent=`${tone}: outside ${outside} · changed ${changed} · silver anchors ${anchors} · failures ${failures}`;
+  }
+  document.querySelectorAll('[data-tone]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-tone]').forEach(other=>other.setAttribute('aria-pressed',String(other===button)));show(button.dataset.tone);}));
+  document.querySelector('#size').addEventListener('click',event=>{const small=board.classList.toggle('small');event.currentTarget.setAttribute('aria-pressed',String(small));});
+  show('purple');
+</script></body></html>

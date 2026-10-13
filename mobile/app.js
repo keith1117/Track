@@ -327,14 +327,7 @@ function userIdentity(user, options = {}) {
   return `<button class="identity ${options.compact ? 'compact' : ''}" data-user="${options.clickable === false ? '' : 'alex'}"><span class="avatar">${user.initials}</span><span class="identity-copy"><b>${e(user.name)}</b><small>${e(user.handle)}</small><em>Lv.${user.level} <i></i> ${e(user.title)}</em></span>${options.follow ? `<span class="follow">${h('common.follow')}</span>` : ''}</button>`;
 }
 
-const bodyIllustrationCrops = {
-  chest:{source:'assets/body-parts-clean-reference.png',imageWidth:1438,imageHeight:1094,left:90,top:90,width:600,height:460},
-  back:{source:'assets/body-parts-clean-reference.png',imageWidth:1438,imageHeight:1094,left:760,top:90,width:600,height:460},
-  shoulders:{source:'assets/body-parts-clean-reference.png',imageWidth:1438,imageHeight:1094,left:90,top:595,width:600,height:460},
-  legs:{source:'assets/body-parts-clean-reference.png',imageWidth:1438,imageHeight:1094,left:760,top:595,width:600,height:460},
-  arms:{source:'assets/body-parts-clean-arms-core.png',imageWidth:1437,imageHeight:1094,left:90,top:595,width:600,height:460},
-  abs:{source:'assets/body-parts-clean-arms-core.png',imageWidth:1437,imageHeight:1094,left:760,top:595,width:600,height:460}
-};
+const bodyIllustrationCrops = window.TrackLevelArt.BODY_CROPS;
 function bodyPartIllustration(id) {
   const crop = bodyIllustrationCrops[id];
   return `<span class="body-part-illustration" aria-hidden="true" style="aspect-ratio:${crop.width}/${crop.height}"><img src="${crop.source}" width="${crop.imageWidth}" height="${crop.imageHeight}" alt="" aria-hidden="true" loading="lazy" decoding="async" draggable="false" style="width:${crop.imageWidth/crop.width*100}%;left:${-crop.left/crop.width*100}%;top:${-crop.top/crop.height*100}%"></span>`;
