@@ -22,7 +22,7 @@ function loadUI({locale='en', allowLocalePreview=false, publicLocales=['en'], re
     localStorage:{getItem(key){if(storageThrows)throw Error('blocked');return stored.get(key) ?? null;},setItem(key,value){if(storageThrows)throw Error('blocked');stored.set(key,value);storageWrites.push({key,value});}},
     setInterval(){},setTimeout(){},clearTimeout(){},Intl,Date,URLSearchParams,console});
   context.window=context;
-  for (const file of ['release-config.js','locales/messages.js','i18n.js','core.js']) vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context,{filename:file});
+  for (const file of ['release-config.js','locales/messages.js','i18n.js','core.js','level-presentation.js']) vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context,{filename:file});
   Object.assign(context.TrackReleaseConfig,{allowLocalePreview,publicLocales,regionProfile});
   vm.runInContext(fs.readFileSync(path.join(root,'app.js'),'utf8'),context,{filename:'app.js'});
   const run = source => vm.runInContext(source,context);
