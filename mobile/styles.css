@@ -472,42 +472,45 @@ button.coach-inline { width: 100%; text-align: left; }
   .phone-frame[data-input="keyboard"] .toast { transition: none !important; }
 }
 
-/* Only the Level overview uses a compact single-screen grid; other pages still scroll normally. */
+/* Level keeps its artwork compact to make room for the saved-workout calendar. */
 .app-content[data-view="level"] { display: flex; flex-direction: column; padding-bottom: 8px; }
 .app-content[data-view="level"] > .locale-switcher,
 .app-content[data-view="level"] > .prototype-switcher,
 .app-content[data-view="level"] > .page-header { flex-shrink: 0; }
-.level-overview { flex: 1; min-height: 464px; display: flex; flex-direction: column; gap: 8px; }
+.level-overview { display: flex; flex-direction: column; gap: 8px; }
 .level-summaries { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; flex: none; }
-.level-summary { min-width: 0; min-height: 168px; padding: 10px; display: flex; flex-direction: column; border: 1px solid #2a3c44; border-radius: 16px; background: #0c181d; }
+.level-summary { min-width: 0; min-height: 148px; padding: 8px; display: flex; flex-direction: column; border: 1px solid #2a3c44; border-radius: 16px; background: #0c181d; }
 .level-summary h1, .level-summary h2 { margin: 0; color: #bccace; font-size: .75rem; font-weight: 650; line-height: 1.35; }
 .rank-summary { align-items: center; text-align: center; background: linear-gradient(145deg,#1c1b15,#0c171b 80%); border-color: #4b422d; }
 .rank-badge { display: block; width: 70px; height: 70px; flex: none; }
-.rank-summary .rank-badge { margin: 3px auto; }
-.rank-summary > strong { font-size: 1.5rem; line-height: 1.15; color: #f1d48a; overflow-wrap: anywhere; }
+.rank-entry { width: 100%; flex: 1; min-height: 44px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0; border: 0; border-radius: 10px; background: transparent; }
+.rank-entry .rank-badge { width: 48px; height: 48px; margin: 2px auto; }
+.rank-entry strong { font-size: 1.375rem; line-height: 1.15; color: #f1d48a; overflow-wrap: anywhere; }
+.rank-entry > span { color: #d9c68f; font-size: .6875rem; line-height: 1.4; }
+.rank-entry i { font-style: normal; }
 .level-sample { color: #9aaeb4; font-size: .6875rem; line-height: 1.4; }
-.rank-summary .level-sample { margin-top: auto; padding-top: 2px; }
-.experience-summary > strong { font-size: 3rem; line-height: 1.1; font-variant-numeric: tabular-nums; letter-spacing: -.05em; }
+.rank-summary .level-sample { padding-top: 2px; }
+.experience-summary > strong { font-size: 2.75rem; line-height: 1.1; font-variant-numeric: tabular-nums; letter-spacing: -.05em; }
 .experience-summary > strong > small { font-size: .75rem; letter-spacing: 0; margin-right: 4px; color: #b4c4c8; }
-.experience-summary .progress-line { height: 4px; margin: 5px 0 4px; flex: none; }
+.experience-summary .progress-line { height: 4px; margin: 3px 0 2px; flex: none; }
 .experience-summary .progress-line span { background: #b7d2d9; }
 .level-xp { color: #9eb4bc; font-size: .6875rem; line-height: 1.4; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .review-progress { display: flex; align-items: center; justify-content: space-between; gap: 4px; min-height: 44px; width: 100%; margin-top: auto; padding: 6px 8px; border: 1px solid #344b54; border-radius: 9px; background: #13252c; color: #dae8ec; text-align: left; font-size: .75rem; font-weight: 650; line-height: 1.3; }
 .review-progress > span { color: #9dbcc7; font-size: 1rem; }
-.level-area-grid { flex: 1; min-height: 288px; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); grid-template-rows: repeat(4,minmax(min-content,1fr)); gap: 8px; }
-.level-area { position: relative; min-width: 0; min-height: 66px; display: grid; grid-template-columns: minmax(0,.95fr) minmax(0,1fr); align-items: center; gap: 5px; padding: 7px; border: 1px solid #2b3d45; border-radius: 14px; background: #0c181c; text-align: left; }
-.level-art { display: block; width: 100%; aspect-ratio: 600/460; overflow: hidden; pointer-events: none; mix-blend-mode: lighten; }
+.level-area-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }
+.level-area { position: relative; min-width: 0; min-height: 44px; display: grid; grid-template-columns: 42px minmax(0,1fr); align-items: center; gap: 6px; padding: 4px 12px 4px 6px; border: 1px solid #2b3d45; border-radius: 11px; background: #0c181c; text-align: left; }
+.level-art { display: block; width: 42px; aspect-ratio: 600/460; overflow: hidden; pointer-events: none; mix-blend-mode: lighten; }
 .level-art[hidden] { display: none; }
 .level-art canvas { display: block; width: 100%; height: auto; }
-.level-area-copy { min-width: 0; display: grid; gap: 2px; }
-.level-area-copy > span { color: #aabfc6; font-size: .8125rem; line-height: 1.25; overflow-wrap: anywhere; }
-.level-area-copy > b { color: #edf2f3; font-size: 1.625rem; line-height: 1.25; font-variant-numeric: tabular-nums; letter-spacing: -.035em; overflow-wrap: anywhere; }
+.level-area-copy { min-width: 0; display: grid; }
+.level-area-copy > span { color: #aabfc6; font-size: .75rem; line-height: 1.2; overflow-wrap: anywhere; }
+.level-area-copy > b { color: #edf2f3; font-size: 1rem; line-height: 1.2; font-variant-numeric: tabular-nums; letter-spacing: -.035em; overflow-wrap: anywhere; }
 .level-area-copy > b small { font-size: .55em; letter-spacing: 0; margin-right: 2px; color: #b2c4cb; }
 .level-area-copy > .unassessed { font-size: .8125rem; letter-spacing: 0; }
 .level-area > .chevron { position: absolute; right: 7px; top: 5px; color: #65818b; font-size: .8125rem; }
 .level-cardio { grid-column: 1/-1; }
 .level-cardio .level-area-copy { grid-column: 1/-1; max-width: 45%; margin-left: 6px; }
-.level-cardio .cardio-illustration { right: 22px; width: min(48%,180px); }
+.level-cardio .cardio-illustration { right: 22px; width: 42px; height: 32px; top: 50%; transform: translateY(-50%); }
 .level-cardio > .chevron { top: 50%; transform: translateY(-50%); right: 12px; }
 .progress-detail, .progress-explanation { margin-top: 12px; padding: 18px; border: 1px solid #2a3f47; border-radius: 16px; background: #0c181d; }
 .progress-detail h1 { margin: 8px 0; font-size: 1rem; }
@@ -519,7 +522,34 @@ button.coach-inline { width: 100%; text-align: left; }
 .progress-rank { display: flex; align-items: center; gap: 12px; border-block: 1px solid #263b43; padding-block: 8px; }
 .progress-rank > span { display: grid; gap: 4px; }.progress-rank small { color: #a2b7be; font-size: .75rem; }.progress-rank b { color: #edcf83; font-size: 1.25rem; }
 .progress-explanation .sample-note { font-size: .75rem; color: #8fa7b0; }
+.training-calendar { padding: 8px 10px; border: 1px solid #2a3c44; border-radius: 14px; background: #0c181d; }
+.calendar-heading, .calendar-month { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.calendar-heading h2 { margin: 0; font-size: .8125rem; line-height: 1.4; }
+.calendar-heading > span { color: var(--green); font-size: .6875rem; }
+.calendar-month > strong { text-align: center; font-size: .8125rem; }
+.calendar-month .icon-button { font-size: 1.375rem; padding: 0; }
+.calendar-weekdays, .calendar-grid { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 3px; text-align: center; }
+.calendar-weekdays { margin-bottom: 3px; color: #8fa7b0; font-size: .625rem; }
+.calendar-day { position: relative; display: grid; place-items: center; min-height: 21px; border: 1px solid transparent; border-radius: 5px; color: #a9bec4; font-size: .6875rem; font-variant-numeric: tabular-nums; }
+.calendar-day.trained { color: #ccf9de; border-color: #286647; background: #163e2b; }
+.calendar-day.today { border-color: #c6d9df; color: #edf6f8; }
+.calendar-day.future { color: #627b85; }
+.calendar-day i { position: absolute; right: 2px; bottom: -2px; font-size: .5rem; font-style: normal; }
+.calendar-note { display: flex; align-items: center; gap: 5px; margin: 5px 0 0; color: #9aafb6; font-size: .625rem; line-height: 1.5; }
+.calendar-note i { color: var(--green); font-style: normal; }
+.rank-detail { margin-top: 8px; padding: 16px; text-align: center; border: 1px solid #4b422d; border-radius: 16px; background: linear-gradient(145deg,#1c1b15,#0c171b 80%); }
+.rank-detail .rank-badge { width: 88px; height: 88px; margin: 8px auto; }
+.rank-detail h1 { margin: 0; color: #f1d48a; font-size: 1.75rem; }
+.rank-detail p { margin: 5px 0 0; color: #acbcc1; font-size: .8125rem; }
+.rank-explanation { margin-top: 10px; padding: 16px; border: 1px solid #2a3f47; border-radius: 14px; background: #0c181d; }
+.rank-explanation h2 { margin: 0; font-size: .9375rem; }
+.rank-explanation p { margin: 8px 0 0; color: #bbcbcf; font-size: .8125rem; line-height: 1.6; }
+.rank-facts, .rank-records { margin-top: 12px; }
+.rank-facts > div, .rank-records > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 0; border-top: 1px solid #263b43; font-size: .75rem; }
+.rank-facts span, .rank-records span { color: #a2b7be; }
+.rank-facts b, .rank-records b { text-align: right; font-variant-numeric: tabular-nums; }
+.rank-explanation .sample-note { color: #8fa7b0; font-size: .75rem; }
 @media (max-width: 360px) {
-  .rank-summary > strong { font-size: 1.25rem; }
+  .rank-entry strong { font-size: 1.25rem; }
   .level-area-copy > span { font-size: .75rem; }
 }

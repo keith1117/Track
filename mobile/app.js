@@ -1,4 +1,4 @@
-const { createInitialState, navigate, addSet, updateSet, toggleSet, saveExercise, setPlan, filterHistory, summarizeHistory } = window.TrackCore;
+const { createInitialState, navigate, addSet, updateSet, toggleSet, saveExercise, setPlan, filterHistory, summarizeHistory, localDateKey, getTrainingCalendar } = window.TrackCore;
 const {getLevelAppearance,getExperienceProgress,rankBadgeSVG,SAMPLE_LEVEL_SUMMARY} = window.TrackLevelPresentation;
 let localeStorage = null;
 try { localeStorage = window.localStorage; } catch { /* Browser storage may be blocked. */ }
@@ -16,6 +16,7 @@ function formatExerciseMetric(metric) {
 function metricWeight(metric) { return ['weight','bodyweight'].includes(metric.kind) ? metric.value : 0; }
 
 const state = createInitialState();
+state.calendarMonth = localDateKey(new Date()).slice(0, 7);
 state.selectedTitle = 'momentum-builder';
 state.recentSearches = ['push day', 'marathon', '@alexchen.fit', 'home workout'];
 
@@ -375,7 +376,26 @@ function renderLevelAreaCard(part) {
 function renderLevel() {
   const {strengthRank,experience}=SAMPLE_LEVEL_SUMMARY;
   const progress=getExperienceProgress(experience.currentXP,experience.nextXP);
-  return `${pageHeader(t('nav.level'))}<div class="level-overview"><div class="level-summaries"><section class="level-summary rank-summary" aria-label="${h('level.strengthRank')}"><h1>${h('level.strengthRank')}</h1>${rankBadgeSVG(strengthRank.badge)}<strong>${h(strengthRank.nameKey)}</strong><small class="level-sample">${h('level.sampleData')}</small></section><section class="level-summary experience-summary" aria-label="${h('level.experienceLevel')}"><h2>${h('level.experienceLevel')}</h2><strong><small>Lv.</small>${n(experience.level)}</strong><div class="progress-line" role="progressbar" aria-label="${h('level.experienceLevel')}" aria-valuemin="0" aria-valuemax="${experience.nextXP}" aria-valuenow="${experience.currentXP}"><span style="transform:scaleX(${progress.fraction})"></span></div><span class="level-xp">${n(experience.currentXP)} / ${n(experience.nextXP)} XP</span><button class="review-progress" data-page="progress">${h('level.reviewProgress')}<span aria-hidden="true">›</span></button></section></div><div class="level-area-grid">${bodyParts.map(renderLevelAreaCard).join('')}</div></div>`;
+  return `${pageHeader(t('nav.level'))}<div class="level-overview"><div class="level-summaries"><section class="level-summary rank-summary" aria-label="${h('level.strengthRank')}"><h1>${h('level.strengthRank')}</h1><button class="rank-entry" data-page="rank" aria-label="${h('rank.viewAria',{rank:t(strengthRank.nameKey)})}">${rankBadgeSVG(strengthRank.badge)}<strong>${h(strengthRank.nameKey)}</strong><small class="level-sample">${h('level.sampleData')}</small><span>${h('rank.view')} <i aria-hidden="true">›</i></span></button></section><section class="level-summary experience-summary" aria-label="${h('level.experienceLevel')}"><h2>${h('level.experienceLevel')}</h2><strong><small>Lv.</small>${n(experience.level)}</strong><div class="progress-line" role="progressbar" aria-label="${h('level.experienceLevel')}" aria-valuemin="0" aria-valuemax="${experience.nextXP}" aria-valuenow="${experience.currentXP}"><span style="transform:scaleX(${progress.fraction})"></span></div><span class="level-xp">${n(experience.currentXP)} / ${n(experience.nextXP)} XP</span><button class="review-progress" data-page="progress">${h('level.reviewProgress')}<span aria-hidden="true">›</span></button></section></div><div class="level-area-grid">${bodyParts.map(renderLevelAreaCard).join('')}</div>${renderTrainingCalendar()}</div>`;
+}
+
+function renderTrainingCalendar() {
+  const today = new Date();
+  const calendar = getTrainingCalendar(state.history, state.calendarMonth, today);
+  const monthLabel = i18n.formatDate(calendar.first, {year:'numeric', month:'long'});
+  const days = calendar.days.map(day => {
+    const status = t(day.future ? 'calendar.upcoming' : day.trained ? 'calendar.trained' : 'calendar.noRecord');
+    const date = new Date(calendar.first.getFullYear(), calendar.first.getMonth(), day.day);
+    const label = t('calendar.dayAria', {date:i18n.formatDate(date, {year:'numeric', month:'long', day:'numeric'}), status});
+    return `<span role="listitem" data-training-date="${day.date}" class="calendar-day${day.trained ? ' trained' : ''}${day.today ? ' today' : ''}${day.future ? ' future' : ''}" aria-label="${e(label)}" title="${e(label)}"${day.today ? ' aria-current="date"' : ''}>${n(day.day)}<i aria-hidden="true">${day.trained ? '✓' : ''}</i></span>`;
+  }).join('');
+  return `<section class="training-calendar" aria-label="${h('calendar.heading')}"><div class="calendar-heading"><h2>${h('calendar.heading')}</h2><span>${h('calendar.count',{count:calendar.trainedDays})}</span></div><div class="calendar-month"><button class="icon-button" data-calendar-month="-1" aria-label="${h('calendar.previous')}">‹</button><strong aria-live="polite">${e(monthLabel)}</strong><button class="icon-button" data-calendar-month="1" aria-label="${h('calendar.next')}"${state.calendarMonth >= localDateKey(today).slice(0,7) ? ' disabled' : ''}>›</button></div><div class="calendar-weekdays" aria-hidden="true">${['mon','tue','wed','thu','fri','sat','sun'].map(day => `<span>${h(`calendar.${day}`)}</span>`).join('')}</div><div class="calendar-grid" role="list" aria-label="${e(monthLabel)}">${'<span aria-hidden="true"></span>'.repeat(calendar.offset)}${days}</div><p class="calendar-note"><i aria-hidden="true">✓</i>${h('calendar.savedCopy')}</p></section>`;
+}
+
+function renderRank() {
+  const {strengthRank} = SAMPLE_LEVEL_SUMMARY;
+  const references = ['bench-press','barbell-row','barbell-squat'].map(id => Object.values(exercises).flat().find(item => item.id === id));
+  return `${pageHeader(t('level.strengthRank'),'level')}<section class="rank-detail"><span class="level-sample">${h('level.sampleData')}</span>${rankBadgeSVG(strengthRank.badge)}<h1>${h(strengthRank.nameKey)}</h1><p>${h('rank.subtitle')}</p></section><section class="rank-explanation"><h2>${h('rank.why',{rank:t(strengthRank.nameKey)})}</h2><p>${h('rank.sourceCopy',{rank:t(strengthRank.nameKey)})}</p><div class="rank-facts"><div><span>${h('rank.sourceLabel')}</span><b>${h('rank.sourceValue')}</b></div><div><span>${h('rank.assessmentLabel')}</span><b>${h('rank.assessmentValue')}</b></div></div></section><section class="rank-explanation"><h2>${h('rank.referenceHeading')}</h2><p>${h('rank.referenceCopy')}</p><div class="rank-records">${references.map(item => `<div><span>${e(item.name)}</span><b>${e(formatExerciseMetric(item.pr))}</b></div>`).join('')}</div></section><section class="rank-explanation"><h2>${h('rank.updateHeading')}</h2><p>${h('rank.updateCopy')}</p><p class="sample-note">${h('rank.xpCopy')}</p></section>`;
 }
 
 function renderProgress() {
@@ -522,15 +542,15 @@ function renderCoach() {
     <section class="ask-coach"><div><span class="coach-monogram small">AI</span><b>${h('coach.ask')}</b></div><div class="coach-prompts"><button data-action="coach-answer">${h('coach.weightQuestion')}</button><button data-action="coach-answer">${h('coach.painQuestion')}</button></div><label><input placeholder="${h('coach.input')}" aria-label="${h('coach.inputAria')}" enterkeyhint="send"><button data-action="coach-answer">${h('coach.send')}</button></label></section>`;
 }
 
-const views = { home: renderHome, exercise: renderExercise, log: renderLog, complete: renderComplete, coach: renderCoach, level: renderLevel, progress: renderProgress, muscle: renderMuscle, titles: renderTitles, 'title-detail': renderTitleDetail, social: renderSocial, search: renderSearch, explore: renderExplore, 'public-profile': renderPublicProfile, profile: renderProfile, stats: renderStats, achievements: renderAchievements, settings: renderSettings, subscription: renderSubscription };
-const rootPages = { home: 'home', exercise: 'home', log: 'home', complete: 'home', coach: 'home', level: 'level', progress:'level', muscle: 'level', titles: 'level', 'title-detail': 'level', social: 'social', search: 'social', explore: 'social', 'public-profile': 'social', profile: 'profile', stats: 'profile', achievements: 'profile', settings: 'profile', subscription: 'profile' };
+const views = { home: renderHome, exercise: renderExercise, log: renderLog, complete: renderComplete, coach: renderCoach, level: renderLevel, rank: renderRank, progress: renderProgress, muscle: renderMuscle, titles: renderTitles, 'title-detail': renderTitleDetail, social: renderSocial, search: renderSearch, explore: renderExplore, 'public-profile': renderPublicProfile, profile: renderProfile, stats: renderStats, achievements: renderAchievements, settings: renderSettings, subscription: renderSubscription };
+const rootPages = { home: 'home', exercise: 'home', log: 'home', complete: 'home', coach: 'home', level: 'level', rank:'level', progress:'level', muscle: 'level', titles: 'level', 'title-detail': 'level', social: 'social', search: 'social', explore: 'social', 'public-profile': 'social', profile: 'profile', stats: 'profile', achievements: 'profile', settings: 'profile', subscription: 'profile' };
 const hideNavPages = new Set(['log', 'complete', 'coach', 'title-detail', 'subscription']);
 
 function render(preserveScroll = false) {
   const previousScroll = app.scrollTop;
   const previousPage = app.dataset.view;
   const focused = document.activeElement;
-  const focusAttribute = app.contains(focused) && ['data-set-input', 'data-cardio-input', 'data-locale', 'data-set', 'data-plan', 'data-muscle-tab', 'data-history-period', 'data-history-metric', 'data-history-exercise', 'data-history-reps', 'data-history-weight', 'data-like', 'data-action'].find((name) => focused.hasAttribute(name));
+  const focusAttribute = app.contains(focused) && ['data-set-input', 'data-cardio-input', 'data-locale', 'data-set', 'data-plan', 'data-calendar-month', 'data-muscle-tab', 'data-history-period', 'data-history-metric', 'data-history-exercise', 'data-history-reps', 'data-history-weight', 'data-like', 'data-action'].find((name) => focused.hasAttribute(name));
   const focusSelector = focusAttribute ? `[${focusAttribute}="${focused.getAttribute(focusAttribute)}"]${focused.dataset.field ? `[data-field="${focused.dataset.field}"]` : ''}` : null;
   app.innerHTML = renderLocaleSwitcher() + prototypeSwitcher() + (views[state.page] || renderHome)();
   app.dataset.view = state.page;
@@ -601,6 +621,15 @@ document.addEventListener('click', (event) => {
   }
   const pageTarget = event.target.closest('[data-page]');
   if (pageTarget) { navigate(state, pageTarget.dataset.page); render(); return; }
+  const calendarMonth = event.target.closest('[data-calendar-month]');
+  if (calendarMonth) {
+    const offset = Number(calendarMonth.dataset.calendarMonth);
+    if (![-1,1].includes(offset)) return;
+    const [year, month] = state.calendarMonth.split('-').map(Number);
+    const next = localDateKey(new Date(year, month - 1 + offset, 1)).slice(0,7);
+    if (next > localDateKey(new Date()).slice(0,7)) return;
+    state.calendarMonth = next; render(true); return;
+  }
   const bodyPart = event.target.closest('[data-body-part]');
   if (bodyPart) { if(openExerciseList(bodyPart.dataset.bodyPart))render(); return; }
   const bodyLevel = event.target.closest('[data-body-level]');
