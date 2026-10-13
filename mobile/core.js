@@ -8,6 +8,7 @@
       plan: 'free',
       page: 'home',
       previousPage: null,
+      exerciseReturnPage: 'home',
       selectedBodyPart: 'chest',
       selectedExercise: 'bench-press',
       dailyStrain: 32,

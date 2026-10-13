@@ -1,4 +1,5 @@
 const { createInitialState, navigate, addSet, updateSet, toggleSet, saveExercise, setPlan, filterHistory, summarizeHistory } = window.TrackCore;
+const {getLevelAppearance,getExperienceProgress,rankBadgeSVG,SAMPLE_LEVEL_SUMMARY} = window.TrackLevelPresentation;
 let localeStorage = null;
 try { localeStorage = window.localStorage; } catch { /* Browser storage may be blocked. */ }
 const i18n = window.TrackI18n.createI18n({messages:window.TrackMessages, config:window.TrackReleaseConfig,
@@ -343,7 +344,7 @@ function renderHome() {
 function renderExercise() {
   const part = bodyParts.find((item) => item.id === state.selectedBodyPart) || bodyParts[0];
   const list = exercises[part.id];
-  return `${pageHeader(part.name, 'home', '<span class="header-count">'+h('workout.count',{count:list.length})+'</span>')}${dailyStrain()}<div class="section-title"><div><h2>${h('workout.heading',{part:part.name})}</h2><p>${h('workout.illustrative')}</p></div></div><div class="exercise-grid">${list.map((item) => { const [primaryId, percent] = muscleShares[item.id][0]; return `<button class="exercise-card ${item.recommended ? 'has-recommendation ' : ''}${state.completedExercises.includes(item.id) ? 'is-complete' : ''}" data-exercise="${item.id}">${item.recommended ? `<span class="recommend-badge">${e(item.recommended)}</span>` : ''}${exerciseIllustration(item)}<span class="exercise-copy"><b>${e(item.name)}</b><small>${h('workout.last',{metric:formatExerciseMetric(item.current)})}</small><em>${h('workout.primary',{part:muscleName(primaryId)})} <strong>${n(percent)}%</strong></em></span><span class="exercise-state">${state.completedExercises.includes(item.id) ? h('common.done') : '›'}</span></button>`; }).join('')}</div>${state.completedExercises.length ? '<button class="finish-day" data-action="finish-day">'+h('workout.finish')+'</button>' : ''}`;
+  return `${pageHeader(part.name, state.exerciseReturnPage, '<span class="header-count">'+h('workout.count',{count:list.length})+'</span>')}${dailyStrain()}<div class="section-title"><div><h2>${h('workout.heading',{part:part.name})}</h2><p>${h('workout.illustrative')}</p></div></div><div class="exercise-grid">${list.map((item) => { const [primaryId, percent] = muscleShares[item.id][0]; return `<button class="exercise-card ${item.recommended ? 'has-recommendation ' : ''}${state.completedExercises.includes(item.id) ? 'is-complete' : ''}" data-exercise="${item.id}">${item.recommended ? `<span class="recommend-badge">${e(item.recommended)}</span>` : ''}${exerciseIllustration(item)}<span class="exercise-copy"><b>${e(item.name)}</b><small>${h('workout.last',{metric:formatExerciseMetric(item.current)})}</small><em>${h('workout.primary',{part:muscleName(primaryId)})} <strong>${n(percent)}%</strong></em></span><span class="exercise-state">${state.completedExercises.includes(item.id) ? h('common.done') : '›'}</span></button>`; }).join('')}</div>${state.completedExercises.length ? '<button class="finish-day" data-action="finish-day">'+h('workout.finish')+'</button>' : ''}`;
 }
 
 function renderLog() {
@@ -363,18 +364,30 @@ function renderComplete() {
   return `<div class="completion-screen"><div class="completion-symbol"><span>✓</span></div><p class="completion-kicker">${h('complete.kicker')}</p><h1>${h('complete.heading')}</h1><p>${h('complete.message')}</p><div class="reward-grid"><div><b>+320</b><span>XP</span></div><div><b>16</b><span>${h('complete.streak')}</span></div><div><b>100</b><span>${h('strain.kicker')}</span></div></div><section class="pr-reveal"><span>${h('complete.session')}</span><div><b>${e(exercise?.name || t('complete.recorded'))}</b><strong>${state.selectedBodyPart === 'cardio' ? h('metric.duration',{value:state.cardioLog?.minutes || 0}) : h('common.done')}</strong></div></section>${coachCompletionCard()}<div class="completion-actions"><button class="primary-button" data-action="continue-home">${h('common.continue')}</button><button class="secondary-button" data-action="share">${h('common.share')}</button></div></div>`;
 }
 
-function radarChart() {
-  const point = (index, radius) => {
-    const angle = (-90 + index * 60) * Math.PI / 180;
-    return `${(150 + Math.cos(angle) * radius).toFixed(1)},${(126 + Math.sin(angle) * radius).toFixed(1)}`;
-  };
-  const polygon = (radius) => levelBodyParts.map((_, index) => point(index, radius)).join(' ');
-  const ability = levelBodyParts.map((part, index) => point(index, Math.min(86, 86 * part.level / 30))).join(' ');
-  return `<svg class="radar" viewBox="0 0 300 254" role="group" aria-label="${h('level.radar')}">${[86,64,42,20].map((radius) => `<polygon points="${polygon(radius)}" fill="none" stroke="currentColor"/>`).join('')}${levelBodyParts.map((_, index) => `<line x1="150" y1="126" x2="${point(index, 86).split(',')[0]}" y2="${point(index, 86).split(',')[1]}" stroke="currentColor"/>`).join('')}<polygon class="radar-fill" points="${ability}"/>${levelBodyParts.map((part, index) => { const [x, y] = point(index, 112).split(','); return `<g class="radar-label" data-body-level="${part.id}" tabindex="0" role="button" aria-label="${h('level.view',{part:part.name,level:part.level})}"><rect x="${Number(x) - 24}" y="${Number(y) - 15}" width="48" height="40" fill="transparent"/><text x="${x}" y="${Number(y) - 3}" text-anchor="middle">${part.name}</text><text class="radar-value" x="${x}" y="${Number(y) + 12}" text-anchor="middle">${part.level}</text></g>`; }).join('')}</svg>`;
+function renderLevelAreaCard(part) {
+  const appearance=getLevelAppearance(part.level);
+  const label=appearance.level===null?t('level.notAssessed'):t('common.level',{level:n(appearance.level)});
+  const art=part.id==='cardio'?cardioTile():`<span class="level-art" data-level-art="${part.id}" data-tone="${appearance.tone}" aria-hidden="true"></span>`;
+  return `<button class="level-area${part.id==='cardio'?' level-cardio':''}" data-body-level="${part.id}" aria-label="${h('level.areaAria',{part:part.name,level:label})}">${art}<span class="level-area-copy"><span>${e(part.name)}</span><b class="${appearance.level===null?'unassessed':''}">${e(label)}</b></span><span class="chevron" aria-hidden="true">›</span></button>`;
 }
 
 function renderLevel() {
-  return `${pageHeader(t('level.heading'))}<div class="dual-levels"><section class="level-panel body-level"><span>${h('level.bodyKicker')}</span><p>${h('level.body')}</p><strong><small>Lv.</small>26</strong><em>${h('level.bodySource')}</em></section><section class="level-panel xp-level"><span>${h('level.experienceKicker')}</span><p>${h('level.experience')}</p><strong><small>Lv.</small>27</strong><div class="progress-line"><span style="transform:scaleX(.69)"></span></div><em>12,450 / 18,000 XP</em></section></div><button class="current-title" data-page="titles"><span class="title-medal">MB</span><span><small>${h('level.currentTitle')}</small><b>Momentum Builder</b><em>${h('titles.requirement.momentum-builder')}</em></span><i>›</i></button><section class="radar-panel"><div class="section-title"><div><h2>${h('level.abilities')}</h2><p>${h('level.tapPart')}</p></div></div>${radarChart()}</section><div class="level-parts">${levelBodyParts.map((part) => `<button data-body-level="${part.id}"><span>${part.name}</span><b>${part.level}</b></button>`).join('')}</div>`;
+  const {strengthRank,experience}=SAMPLE_LEVEL_SUMMARY;
+  const progress=getExperienceProgress(experience.currentXP,experience.nextXP);
+  return `${pageHeader(t('nav.level'))}<div class="level-overview"><div class="level-summaries"><section class="level-summary rank-summary" aria-label="${h('level.strengthRank')}"><h1>${h('level.strengthRank')}</h1>${rankBadgeSVG(strengthRank.badge)}<strong>${h(strengthRank.nameKey)}</strong><small class="level-sample">${h('level.sampleData')}</small></section><section class="level-summary experience-summary" aria-label="${h('level.experienceLevel')}"><h2>${h('level.experienceLevel')}</h2><strong><small>Lv.</small>${n(experience.level)}</strong><div class="progress-line" role="progressbar" aria-label="${h('level.experienceLevel')}" aria-valuemin="0" aria-valuemax="${experience.nextXP}" aria-valuenow="${experience.currentXP}"><span style="transform:scaleX(${progress.fraction})"></span></div><span class="level-xp">${n(experience.currentXP)} / ${n(experience.nextXP)} XP</span><button class="review-progress" data-page="progress">${h('level.reviewProgress')}<span aria-hidden="true">›</span></button></section></div><div class="level-area-grid">${bodyParts.map(renderLevelAreaCard).join('')}</div></div>`;
+}
+
+function renderProgress() {
+  const {strengthRank,experience}=SAMPLE_LEVEL_SUMMARY;
+  const progress=getExperienceProgress(experience.currentXP,experience.nextXP);
+  const title=titles.find(item=>item.id===state.selectedTitle)||titles[0];
+  return `${pageHeader(t('progress.heading'),'level')}<section class="progress-detail"><span class="level-sample">${h('level.sampleData')}</span><h1>${h('level.experienceLevel')}</h1><strong class="progress-level">${h('common.level',{level:n(experience.level)})}</strong><div class="progress-line"><span style="transform:scaleX(${progress.fraction})"></span></div><p>${n(experience.currentXP)} / ${n(experience.nextXP)} XP</p><b>${h('progress.remaining',{xp:n(progress.remaining)})}</b></section><section class="progress-explanation"><h2>${h('progress.separateHeading')}</h2><p>${h('progress.separateCopy')}</p><div class="progress-rank">${rankBadgeSVG(strengthRank.badge)}<span><small>${h('level.strengthRank')}</small><b>${h(strengthRank.nameKey)}</b></span></div><p class="sample-note">${h('progress.sampleCopy')}</p></section><button class="current-title" data-page="titles"><span class="title-medal">${e(title.icon)}</span><span><small>${h('level.currentTitle')}</small><b>${e(title.name)}</b><em>${h('progress.titlesCopy')}</em></span><i aria-hidden="true">›</i></button>`;
+}
+
+function openExerciseList(bodyPart, origin='home') {
+  if(!bodyParts.some(part=>part.id===bodyPart))return false;
+  state.exerciseReturnPage=origin==='level'?'level':'home';
+  navigate(state,'exercise',{bodyPart});return true;
 }
 
 function historyDate(date) {
@@ -508,8 +521,8 @@ function renderCoach() {
     <section class="ask-coach"><div><span class="coach-monogram small">AI</span><b>${h('coach.ask')}</b></div><div class="coach-prompts"><button data-action="coach-answer">${h('coach.weightQuestion')}</button><button data-action="coach-answer">${h('coach.painQuestion')}</button></div><label><input placeholder="${h('coach.input')}" aria-label="${h('coach.inputAria')}" enterkeyhint="send"><button data-action="coach-answer">${h('coach.send')}</button></label></section>`;
 }
 
-const views = { home: renderHome, exercise: renderExercise, log: renderLog, complete: renderComplete, coach: renderCoach, level: renderLevel, muscle: renderMuscle, titles: renderTitles, 'title-detail': renderTitleDetail, social: renderSocial, search: renderSearch, explore: renderExplore, 'public-profile': renderPublicProfile, profile: renderProfile, stats: renderStats, achievements: renderAchievements, settings: renderSettings, subscription: renderSubscription };
-const rootPages = { home: 'home', exercise: 'home', log: 'home', complete: 'home', coach: 'home', level: 'level', muscle: 'level', titles: 'level', 'title-detail': 'level', social: 'social', search: 'social', explore: 'social', 'public-profile': 'social', profile: 'profile', stats: 'profile', achievements: 'profile', settings: 'profile', subscription: 'profile' };
+const views = { home: renderHome, exercise: renderExercise, log: renderLog, complete: renderComplete, coach: renderCoach, level: renderLevel, progress: renderProgress, muscle: renderMuscle, titles: renderTitles, 'title-detail': renderTitleDetail, social: renderSocial, search: renderSearch, explore: renderExplore, 'public-profile': renderPublicProfile, profile: renderProfile, stats: renderStats, achievements: renderAchievements, settings: renderSettings, subscription: renderSubscription };
+const rootPages = { home: 'home', exercise: 'home', log: 'home', complete: 'home', coach: 'home', level: 'level', progress:'level', muscle: 'level', titles: 'level', 'title-detail': 'level', social: 'social', search: 'social', explore: 'social', 'public-profile': 'social', profile: 'profile', stats: 'profile', achievements: 'profile', settings: 'profile', subscription: 'profile' };
 const hideNavPages = new Set(['log', 'complete', 'coach', 'title-detail', 'subscription']);
 
 function render(preserveScroll = false) {
@@ -521,7 +534,7 @@ function render(preserveScroll = false) {
   app.innerHTML = renderLocaleSwitcher() + prototypeSwitcher() + (views[state.page] || renderHome)();
   app.dataset.view = state.page;
   app.scrollTop = preserveScroll ? previousScroll : 0;
-  const activeRoot = rootPages[state.page];
+  const activeRoot = state.page==='exercise'&&state.selectedBodyPart==='cardio'&&state.exerciseReturnPage==='level'?'level':rootPages[state.page];
   document.querySelectorAll('.nav-item').forEach((button) => {
     const active = button.dataset.page === activeRoot;
     button.classList.toggle('active', active);
@@ -531,6 +544,7 @@ function render(preserveScroll = false) {
   const hideNav = hideNavPages.has(state.page);
   bottomNav.hidden = hideNav;
   app.classList.toggle('full-height', hideNav);
+  if(state.page==='level')void window.TrackLevelArt.hydrateLevelArt(app);
   if (previousPage === state.page && focusSelector) app.querySelector(focusSelector)?.focus({ preventScroll: true });
   else if (keyboardInput) {
     const heading = app.querySelector('h1, .header-context');
@@ -571,11 +585,6 @@ document.addEventListener('change', (event) => {
 document.addEventListener('keydown', (event) => {
   keyboardInput = true;
   frame.dataset.input = 'keyboard';
-  const label = event.target.closest('.radar-label[data-body-level]');
-  if (label && (event.key === 'Enter' || event.key === ' ')) {
-    event.preventDefault();
-    label.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-  }
 });
 
 document.addEventListener('click', (event) => {
@@ -592,9 +601,12 @@ document.addEventListener('click', (event) => {
   const pageTarget = event.target.closest('[data-page]');
   if (pageTarget) { navigate(state, pageTarget.dataset.page); render(); return; }
   const bodyPart = event.target.closest('[data-body-part]');
-  if (bodyPart) { navigate(state, 'exercise', { bodyPart: bodyPart.dataset.bodyPart }); render(); return; }
+  if (bodyPart) { if(openExerciseList(bodyPart.dataset.bodyPart))render(); return; }
   const bodyLevel = event.target.closest('[data-body-level]');
   if (bodyLevel) {
+    const id=bodyLevel.dataset.bodyLevel;
+    if(!bodyParts.some(part=>part.id===id))return;
+    if(id==='cardio'){openExerciseList(id,'level');render();return;}
     state.activeMuscleTab = 'current';
     state.historyFilters.exerciseId = 'all';
     state.historyFilters.reps = 'all';

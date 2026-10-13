@@ -392,5 +392,20 @@
   "social.workoutSummary": "Push workout · 1h 12m · 8 exercises",
   "profile.cover": "PROGRESS OVER PROMISES",
   "subscription.kicker": "YOUR AI COACH",
-  "coach.status": "PRO ACTIVE"
+  "coach.status": "PRO ACTIVE",
+  "level.strengthRank": "Strength Rank",
+  "level.experienceLevel": "Experience Level",
+  "level.reviewProgress": "Review Progress",
+  "level.notAssessed": "Not assessed",
+  "level.sampleData": "Sample data",
+  "level.areaAria": "View {part} · {level}",
+  "level.rank.foundation": "Foundation",
+  "level.rank.goldII": "Gold II",
+  "level.rank.eliteIII": "Elite III",
+  "progress.heading": "Your progress",
+  "progress.remaining": "{xp} XP to the next experience level",
+  "progress.separateHeading": "Two ways to grow",
+  "progress.separateCopy": "Strength reflects performance. Experience rewards consistency. XP does not increase Strength Rank.",
+  "progress.sampleCopy": "These ranks, levels and XP are prototype examples, not a strength assessment. Saving workouts updates your history, not these sample levels.",
+  "progress.titlesCopy": "Explore your earned and upcoming titles"
 }

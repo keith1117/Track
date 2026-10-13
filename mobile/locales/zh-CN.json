@@ -392,5 +392,20 @@
   "social.workoutSummary": "推类训练 · 1 小时 12 分钟 · 8 个动作",
   "profile.cover": "PROGRESS OVER PROMISES",
   "subscription.kicker": "YOUR AI COACH",
-  "coach.status": "PRO 已启用"
+  "coach.status": "PRO 已启用",
+  "level.strengthRank": "力量段位",
+  "level.experienceLevel": "经验等级",
+  "level.reviewProgress": "查看成长",
+  "level.notAssessed": "未评估",
+  "level.sampleData": "示例数据",
+  "level.areaAria": "查看{part} · {level}",
+  "level.rank.foundation": "基础",
+  "level.rank.goldII": "黄金 II",
+  "level.rank.eliteIII": "精英 III",
+  "progress.heading": "你的成长",
+  "progress.remaining": "距离下个经验等级还差 {xp} XP",
+  "progress.separateHeading": "两种成长，彼此独立",
+  "progress.separateCopy": "力量反映训练表现，经验体现训练积累。XP 不会直接提升力量段位。",
+  "progress.sampleCopy": "当前段位、等级和 XP 均为原型示例，不是力量评估结果。保存训练会更新你的历史，但不会改变这些示例等级。",
+  "progress.titlesCopy": "查看已获得和待解锁的称号"
 }
