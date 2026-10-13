@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const {spawnSync} = require('node:child_process');
 const {loadUI} = require('./helpers/load-ui.js');
-const pages=['home','exercise','log','complete','coach','level','progress','muscle','titles','title-detail','social','search','explore','public-profile','profile','stats','achievements','settings','subscription'];
+const pages=['home','exercise','log','complete','coach','level','rank','progress','muscle','titles','title-detail','social','search','explore','public-profile','profile','stats','achievements','settings','subscription'];
 test('six body cards use text-free cropped art and independently localized real controls', () => {
   for(const locale of ['en','zh-CN']) {
     const ui=loadUI({locale,allowLocalePreview:true});
@@ -20,7 +20,7 @@ test('six body cards use text-free cropped art and independently localized real 
 for(const page of pages) test(`${page} renders complete bilingual copy in Free and Pro`, () => {
   for(const locale of ['en','zh-CN']) {
     const ui=loadUI({locale,allowLocalePreview:true});
-    assert.equal(ui.run('Object.keys(views).length'),19);
+    assert.equal(ui.run('Object.keys(views).length'),pages.length);
     for(const plan of ['free','pro']) {
       ui.run(`state.plan='${plan}';state.page='${page}'`);
       const html=ui.run('views[state.page]()');

@@ -12,7 +12,7 @@ const loadUI = () => loadLocalizedUI({locale:'zh-CN',allowLocalePreview:true});
 test('all existing screens render in both Free and Pro states', () => {
   const { context } = loadUI();
   const pages = vm.runInContext('Object.keys(views)', context);
-  assert.equal(pages.length, 19);
+  assert.equal(pages.length, 20);
   for (const plan of ['free', 'pro']) {
     for (const page of pages) {
       const html = vm.runInContext(`state.plan = '${plan}'; state.page = '${page}'; views[state.page]()`, context);
