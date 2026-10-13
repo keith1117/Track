@@ -397,6 +397,7 @@
   "level.experienceLevel": "经验等级",
   "level.reviewProgress": "查看成长",
   "level.notAssessed": "未评估",
+  "level.unit": "Lv.",
   "level.sampleData": "示例数据",
   "level.areaAria": "查看{part} · {level}",
   "level.rank.foundation": "基础",

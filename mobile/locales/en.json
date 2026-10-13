@@ -397,6 +397,7 @@
   "level.experienceLevel": "Experience Level",
   "level.reviewProgress": "Review Progress",
   "level.notAssessed": "Not assessed",
+  "level.unit": "Lv.",
   "level.sampleData": "Sample data",
   "level.areaAria": "View {part} · {level}",
   "level.rank.foundation": "Foundation",

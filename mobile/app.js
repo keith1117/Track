@@ -367,8 +367,9 @@ function renderComplete() {
 function renderLevelAreaCard(part) {
   const appearance=getLevelAppearance(part.level);
   const label=appearance.level===null?t('level.notAssessed'):t('common.level',{level:n(appearance.level)});
+  const value=appearance.level===null?e(label):`<small>${h('level.unit')}</small><span>${n(appearance.level)}</span>`;
   const art=part.id==='cardio'?cardioTile():`<span class="level-art" data-level-art="${part.id}" data-tone="${appearance.tone}" aria-hidden="true"></span>`;
-  return `<button class="level-area${part.id==='cardio'?' level-cardio':''}" data-body-level="${part.id}" aria-label="${h('level.areaAria',{part:part.name,level:label})}">${art}<span class="level-area-copy"><span>${e(part.name)}</span><b class="${appearance.level===null?'unassessed':''}">${e(label)}</b></span><span class="chevron" aria-hidden="true">›</span></button>`;
+  return `<button class="level-area${part.id==='cardio'?' level-cardio':''}" data-body-level="${part.id}" aria-label="${h('level.areaAria',{part:part.name,level:label})}">${art}<span class="level-area-copy"><span>${e(part.name)}</span><b class="${appearance.level===null?'unassessed':''}">${value}</b></span><span class="chevron" aria-hidden="true">›</span></button>`;
 }
 
 function renderLevel() {

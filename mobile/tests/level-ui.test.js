@@ -29,6 +29,12 @@ test('unassessed body areas keep localized labels instead of fake numeric levels
   }
 });
 
+test('numeric area values separate their compact unit from the prominent number',()=>{
+  const ui=loadUI();const html=ui.run('renderLevelAreaCard(bodyParts[0])');
+  assert.match(html,/<small>Lv\.<\/small><span>24<\/span>/);
+  assert.match(html,/aria-label="View Chest · Lv\.24"/);
+});
+
 test('Progress is a read-only Level route with the same XP numbers and preserved title access',()=>{
   const ui=loadUI();ui.dispatchClick({page:'level'});ui.dispatchClick({page:'progress'});
   assert.equal(ui.run('state.page'),'progress');assert.match(ui.app.innerHTML,/5,550/);
