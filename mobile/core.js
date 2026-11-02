@@ -121,5 +121,24 @@
     };
   }
 
-  return { createInitialState, navigate, addSet, updateSet, toggleSet, saveExercise, setPlan, filterHistory, summarizeHistory };
+  function localDateKey(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+
+  function getTrainingCalendar(history, month, today = new Date()) {
+    const [year, monthNumber] = month.split('-').map(Number);
+    const first = new Date(year, monthNumber - 1, 1);
+    const dayCount = new Date(year, monthNumber, 0).getDate();
+    const todayKey = localDateKey(today);
+    const trainedDates = new Set(history.filter(entry => entry.source !== 'sample')
+      .map(entry => new Date(entry.date)).filter(date => Number.isFinite(date.getTime()))
+      .map(localDateKey).filter(key => key <= todayKey));
+    const days = Array.from({length:dayCount}, (_, index) => {
+      const date = localDateKey(new Date(year, monthNumber - 1, index + 1));
+      return {date, day:index + 1, trained:trainedDates.has(date), today:date === todayKey, future:date > todayKey};
+    });
+    return {month, first, offset:(first.getDay() + 6) % 7, days, trainedDays:days.filter(day => day.trained).length};
+  }
+
+  return { createInitialState, navigate, addSet, updateSet, toggleSet, saveExercise, setPlan, filterHistory, summarizeHistory, localDateKey, getTrainingCalendar };
 });

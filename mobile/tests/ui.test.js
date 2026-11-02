@@ -12,7 +12,7 @@ const loadUI = () => loadLocalizedUI({locale:'zh-CN',allowLocalePreview:true});
 test('all existing screens render in both Free and Pro states', () => {
   const { context } = loadUI();
   const pages = vm.runInContext('Object.keys(views)', context);
-  assert.equal(pages.length, 19);
+  assert.equal(pages.length, 20);
   for (const plan of ['free', 'pro']) {
     for (const page of pages) {
       const html = vm.runInContext(`state.plan = '${plan}'; state.page = '${page}'; views[state.page]()`, context);
@@ -103,7 +103,7 @@ test('body cards preserve the original artwork files and real training routes', 
 test('the cardio card uses a decorative monochrome runner without target highlighting', () => {
   const { context } = loadUI();
   const html = vm.runInContext('renderHome()', context);
-  assert.equal((html.match(/class="body-card /g) || []).length, 7);
+  assert.equal((html.match(/class="body-card(?:\s|")/g) || []).length, 7);
   const art = vm.runInContext('cardioTile()', context);
   assert.match(art, /src="assets\/exercises\/cardio-runner.png"/);
   assert.match(art, /alt="" aria-hidden="true"/);

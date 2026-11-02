@@ -93,11 +93,68 @@ test('read-only Level and Progress browsing plus language switching preserve uns
 
 test('saving a workout cannot silently change the sample Rank, XP or area levels',()=>{
   const ui=loadUI();const summary=ui.run('JSON.stringify(TrackLevelPresentation.SAMPLE_LEVEL_SUMMARY)');
-  const levels=ui.run('JSON.stringify(bodyParts.map(p=>p.level))');const markup=ui.run('renderLevel()');
+  const levels=ui.run('JSON.stringify(bodyParts.map(p=>p.level))');
+  const summaries=()=>ui.run('renderLevel()').match(/<div class="level-summaries">[\s\S]*?<div class="level-area-grid">/)[0];
+  const markup=summaries();
   ui.dispatchClick({action:'save-exercise'});
-  assert.equal(ui.run('state.history.length'),1);assert.equal(ui.run('renderLevel()'),markup);
+  assert.equal(ui.run('state.history.length'),1);assert.equal(summaries(),markup);
   assert.equal(ui.run('JSON.stringify(bodyParts.map(p=>p.level))'),levels);
   assert.equal(ui.run('JSON.stringify(TrackLevelPresentation.SAMPLE_LEVEL_SUMMARY)'),summary);
+});
+
+test('Strength Rank opens its explanation and returns without changing workouts or filters',()=>{
+  for(const locale of ['en','zh-CN']) {
+    const ui=loadUI({locale,allowLocalePreview:true});
+    ui.run("state.workout.sets[0].weight=75.5;state.cardioLog={minutes:31,distance:5.2};state.historyFilters.minWeight='70'");
+    const snapshot=()=>ui.run('JSON.stringify({workout:state.workout,cardio:state.cardioLog,filters:state.historyFilters,history:state.history,month:state.calendarMonth})');
+    const before=snapshot();
+    ui.dispatchClick({page:'level'});assert.match(ui.app.innerHTML,/data-page="rank"/);
+    ui.dispatchClick({page:'rank'});
+    assert.equal(ui.nav[1].getAttribute('aria-current'),'page');
+    assert.match(ui.app.innerHTML,locale==='en'?/fixed example rank/:/预设的示例段位/);
+    for(const value of ['100 kg','95 kg','110 kg'])assert.match(ui.app.innerHTML,new RegExp(value));
+    assert.match(ui.app.innerHTML,/data-page="level"/);
+    ui.dispatchClick({locale:locale==='en'?'zh-CN':'en'});ui.dispatchClick({page:'level'});
+    assert.equal(snapshot(),before);assert.equal(ui.storageWrites.length,1);
+    assert.equal(ui.storageWrites[0].key,'track.locale.v1');
+  }
+});
+
+test('calendar uses saved history, deduplicates workout days and restores after reload',()=>{
+  const {localDateKey}=require('../core.js');
+  const today=new Date(), key=localDateKey(today);
+  const history=[{id:'prior',bodyPart:'chest',exerciseId:'bench-press',date:today.toISOString(),sets:[{weight:65,reps:8}]}];
+  for(const locale of ['en','zh-CN']) {
+    const ui=loadUI({locale,allowLocalePreview:true,history});
+    const trained=html=>[...html.matchAll(/data-training-date="([^"]+)" class="calendar-day trained/g)].map(match=>match[1]);
+    assert.deepEqual(trained(ui.run('renderTrainingCalendar()')),[key]);
+    ui.dispatchClick({action:'save-exercise'});
+    ui.dispatchClick({bodyPart:'cardio'});ui.dispatchClick({exercise:'treadmill-run'});
+    ui.dispatchClick({action:'save-exercise'});
+    assert.equal(ui.run('state.history.length'),3);
+    assert.deepEqual(trained(ui.run('renderTrainingCalendar()')),[key]);
+    const saved=ui.storageWrites.filter(write=>write.key==='track.training-history.v1').at(-1);
+    const reloaded=loadUI({locale,allowLocalePreview:true,history:JSON.parse(saved.value)});
+    assert.deepEqual(trained(reloaded.run('renderTrainingCalendar()')),[key]);
+    assert.equal(reloaded.storageWrites.length,0);
+  }
+  assert.doesNotMatch(loadUI().run('renderTrainingCalendar()'),/class="calendar-day trained/);
+});
+
+test('calendar month navigation crosses years, rejects future months and preserves drafts',()=>{
+  const ui=loadUI({allowLocalePreview:true});
+  ui.run("state.calendarMonth='2025-01';state.workout.sets[0].weight=77.5;state.historyFilters.minWeight='70'");
+  const draft=()=>ui.run('JSON.stringify({workout:state.workout,filters:state.historyFilters,history:state.history})');
+  const before=draft();
+  ui.dispatchClick({calendarMonth:'-1'});assert.equal(ui.run('state.calendarMonth'),'2024-12');
+  ui.dispatchClick({calendarMonth:'1'});assert.equal(ui.run('state.calendarMonth'),'2025-01');
+  ui.dispatchClick({locale:'zh-CN'});assert.equal(ui.run('state.calendarMonth'),'2025-01');
+  ui.run('state.calendarMonth=localDateKey(new Date()).slice(0,7)');
+  const month=ui.run('state.calendarMonth');
+  ui.dispatchClick({calendarMonth:'1'});ui.dispatchClick({calendarMonth:'99'});
+  assert.equal(ui.run('state.calendarMonth'),month);assert.equal(draft(),before);
+  assert.match(ui.run('renderTrainingCalendar()'),/data-calendar-month="1"[^>]* disabled/);
+  assert.ok(ui.storageWrites.every(write=>write.key!=='track.training-history.v1'));
 });
 
 test('unknown area routes cannot replace a valid selection or reset a draft',()=>{

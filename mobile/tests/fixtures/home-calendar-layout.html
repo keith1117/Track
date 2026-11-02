@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Track Home & Calendar · layout QA</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; color: #163139; background: #e8f0ef; font: 15px system-ui; }
+    main { display: flex; align-items: start; gap: 40px; flex-wrap: wrap; }
+    .preview { width: 292.5px; height: 633px; flex: none; overflow: hidden; border-radius: 20px; box-shadow: 0 18px 48px #1c333330; }
+    iframe { display: block; width: 390px; height: 844px; border: 0; transform: scale(.75); transform-origin: top left; }
+    aside { max-width: 420px; }
+    h1 { margin-top: 8px; font-size: 28px; line-height: 1.2; }
+    p { color: #536a70; line-height: 1.6; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+    button { min-height: 44px; padding: 8px 12px; border: 1px solid #9eb4b9; border-radius: 9px; background: #f7fbfa; color: #254049; font: inherit; cursor: pointer; }
+    .note { font-size: 12px; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="preview"><iframe title="Actual Track app" src="../../index.html"></iframe></div>
+    <aside>
+      <h1>Track Home & Calendar<br>Actual app · QA preview</h1>
+      <p>Home keeps all seven training entries on one standard phone screen. Saved workout days show a readable date and a checkmark on Level.</p>
+      <p class="note">The frame loads the actual app. Its 75% presentation scale is not used for acceptance measurements. Controls below only change this QA frame, never training history.</p>
+      <div class="controls">
+        <button data-size="320,740">320 × 740</button>
+        <button data-size="390,844">390 × 844</button>
+        <button data-size="430,932">430 × 932</button>
+        <button data-size="740,320">Landscape</button>
+        <button data-size="320,480">Short screen</button>
+      </div>
+      <div class="controls">
+        <button id="text">Text 200%</button>
+        <button id="long">Long Home labels</button>
+        <button id="reset">Restore actual page</button>
+      </div>
+      <p id="status" role="status">390 × 844 CSS px · unchanged app</p>
+      <p class="note">Text 200% changes root font size, not native browser zoom. Long labels only change displayed text. Restore reloads this frame and discards its unsaved inputs, not its saved history.</p>
+    </aside>
+  </main>
+  <script>
+    const frame=document.querySelector('iframe'),preview=document.querySelector('.preview'),status=document.querySelector('#status');
+    document.querySelectorAll('[data-size]').forEach(button=>button.onclick=()=>{
+      const [width,height]=button.dataset.size.split(',').map(Number);
+      frame.style.width=width+'px';frame.style.height=height+'px';
+      preview.style.width=width*.75+'px';preview.style.height=height*.75+'px';
+      status.textContent=width+' × '+height+' CSS px';
+    });
+    document.querySelector('#text').onclick=()=>{
+      frame.contentDocument.documentElement.style.fontSize='32px';
+      status.textContent='200% root text · CSS simulation, not native browser zoom';
+    };
+    document.querySelector('#long').onclick=()=>{
+      frame.contentDocument.querySelectorAll('.body-copy b').forEach(node=>node.textContent='Long training area · 肌群名称');
+      status.textContent='Long displayed labels · no data changed';
+    };
+    document.querySelector('#reset').onclick=()=>{
+      frame.src='../../index.html';status.textContent='Actual app restored · unsaved frame inputs discarded';
+    };
+  </script>
+</body>
+</html>
