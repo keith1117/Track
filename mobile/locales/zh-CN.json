@@ -96,6 +96,17 @@
   "home.streak": "连续训练 16 天",
   "home.heading": "今天练什么？",
   "home.quest": "今日训练",
+  "home.sampleData": "示例数据",
+  "home.strainRemaining": "距今日目标还差 {remaining} 点",
+  "home.coachHeading": "你的下一次训练",
+  "home.coachCopy": "AI 教练个性化指导",
+  "home.note.chest": "48 小时前",
+  "home.note.back": "状态良好",
+  "home.note.shoulders": "3 天前",
+  "home.note.legs": "昨天",
+  "home.note.arms": "状态良好",
+  "home.note.abs": "4 天前",
+  "home.note.cardio": "本周 1 次",
   "home.completed": {
     "one": "{count} 个动作完成",
     "other": "{count} 个动作完成"
@@ -424,6 +435,7 @@
   "rank.updateCopy": "保存力量或有氧训练会更新本机历史，并在训练日历上标记当天。此原型尚未启用段位晋升规则，因此保存训练不会改变黄金 II。",
   "rank.xpCopy": "经验等级与力量段位独立。示例 XP 和部位等级不决定当前段位。",
   "calendar.heading": "训练日历",
+  "calendar.legend": "已保存训练",
   "calendar.count": {
     "one": "{count} 天训练",
     "other": "{count} 天训练"

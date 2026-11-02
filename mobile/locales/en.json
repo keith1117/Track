@@ -96,6 +96,17 @@
   "home.streak": "16-day training streak",
   "home.heading": "What will you train today?",
   "home.quest": "Today's workout",
+  "home.sampleData": "Sample data",
+  "home.strainRemaining": "{remaining} points to today's goal",
+  "home.coachHeading": "Your next workout",
+  "home.coachCopy": "AI-powered training",
+  "home.note.chest": "48h ago",
+  "home.note.back": "Ready",
+  "home.note.shoulders": "3d ago",
+  "home.note.legs": "Yesterday",
+  "home.note.arms": "Ready",
+  "home.note.abs": "4d ago",
+  "home.note.cardio": "Once this week",
   "home.completed": {
     "one": "{count} exercise complete",
     "other": "{count} exercises complete"
@@ -423,7 +434,8 @@
   "rank.updateHeading": "What updates with training?",
   "rank.updateCopy": "Saving a strength or cardio workout updates your local history and marks that day on the training calendar. Rank promotion rules are not active in this prototype, so these saves do not change Gold II.",
   "rank.xpCopy": "Experience Level and Strength Rank are separate. The example XP and body-part levels do not determine this rank.",
-  "calendar.heading": "Training calendar",
+  "calendar.heading": "Workout calendar",
+  "calendar.legend": "Saved workout",
   "calendar.count": {
     "one": "{count} training day",
     "other": "{count} training days"

@@ -103,7 +103,7 @@ test('body cards preserve the original artwork files and real training routes', 
 test('the cardio card uses a decorative monochrome runner without target highlighting', () => {
   const { context } = loadUI();
   const html = vm.runInContext('renderHome()', context);
-  assert.equal((html.match(/class="body-card /g) || []).length, 7);
+  assert.equal((html.match(/class="body-card(?:\s|")/g) || []).length, 7);
   const art = vm.runInContext('cardioTile()', context);
   assert.match(art, /src="assets\/exercises\/cardio-runner.png"/);
   assert.match(art, /alt="" aria-hidden="true"/);
